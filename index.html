@@ -1,44 +1,253 @@
+# Constitutional Connect
+
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constitutional Connect</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: black;
+            color: white;
+            text-align: center;
+            overflow: hidden;
+        }
+        .container {
+            margin: 20px auto;
+            padding: 40px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            width: 80%;
+            max-width: 800px;
+            animation: fadeIn 1s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .word {
+            display: inline-block;
+            margin: 15px;
+            padding: 15px;
+            border: 2px solid #007BFF;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            font-size: 24px;
+        }
+        .word:hover {
+            background-color: #007BFF;
+            color: white;
+            transform: scale(1.1);
+        }
+        .hidden {
+            display: none;
+        }
+        .score {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        .button {
+            padding: 15px 30px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 20px;
+        }
+        .button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="welcome">
+        <h1>Welcome to the Constitutional Connect Game!</h1>
+        <p>Instructions: Select words from the same category to progress through the levels. Can you complete all levels?</p>
+        <button class="button" id="startGame">Start Game</button>
+    </div>
 
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Welcome to Ludo</title>
-        <link rel="icon" href="ludoFacIcon.png" type="image/png">
-        <meta name="description" content="">
-        <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
-        name="viewport">
-        <link rel="stylesheet" href="bootstrap.min.css">
-        <link rel="stylesheet" href="index.css">
-    </head>
-    <body>
-        <div class="menuContainer">
-            <div class="container my-auto">
-                <div class="row">
-
-                    <div class="col-sm-8 col-md-6 col-lg-5 col-xl-4 startMenu mx-auto text-center" > 
-                        <div class="menu">
-                            <h1 class="my-3 "><b>LUDO LIBERTY</b></h1>
-                            <img class="dice" src="diceFront.png" alt="">
-                            <h3 class="my-3 font-monospace">Select Players</h3>
-                            <div class="choosePlayers">
-                                <div class="redPlayer players" id="redPlayer"><img src="red token.png" alt="" ></div>
-                                <div class="greenPlayer players" id="greenPlayer"><img src="green token.png" alt=""></div>
-                                <div class="yellowPlayer players" id="yellowPlayer"><img src="yellow token.png" alt=""></div>
-                                <div class="bluePlayer players" id="bluePlayer"><img src="blue token.png" alt=""></div>
-                            </div>
-                            <div class="start ">
-                                <a href="#" class="btn btn-light my-3" id="play"><b>Play</b></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="container hidden" id="gameArea">
+        <h2>Select words from only Constitution</h2>
+        <!-- Level 1 -->
+        <div id="level1" class="level">
+            <h3>Level 1</h3>
+            <div class="word" data-category="1">Preamble</div>
+            <div class="word" data-category="2">Team</div>
+            <div class="word" data-category="1">Rights</div>
+            <div class="word" data-category="1">Justice</div>
+            <div class="word" data-category="2">Challenge</div>
+            <div class="word" data-category="2">Gameboard</div>
         </div>
-       
-        
+        <!-- Level 2 -->
+        <div id="level2" class="level hidden">
+            <h3>Level 2</h3>
+            <div class="word" data-category="4">Citizen</div>
+            <div class="word" data-category="4">Authority</div>
+            <div class="word" data-category="3">liberty</div>
+            <div class="word" data-category="4">Duty</div>
+            <div class="word" data-category="3">Equality</div>
+            <div class="word" data-category="4">Declaration</div>
+            <div class="word" data-category="4">Bylaw</div>
+            <div class="word" data-category="3">Secular</div>
+            <div class="word" data-category="3">Amendment</div>
+        </div>
 
-        <script src="index.js" async defer></script>
-    </body>
+        <!-- Level 3 -->
+        <div id="level3" class="level hidden">
+            <h3>Level 3</h3>
+            <div class="word" data-category="9">Balance</div>
+            <div class="word" data-category="10">Ethics</div>
+            <div class="word" data-category="10">Federalism</div>
+            <div class="word" data-category="9">Unity</div>
+            <div class="word" data-category="9">Ethics</div>
+            <div class="word" data-category="10">Judiciary</div>
+            <div class="word" data-category="9">Framework</div>
+            <div class="word" data-category="10">Enactment</div>
+            <div class="word" data-category="10">Amendment</div>
+            <div class="word" data-category="9">Agreement</div>
+            <div class="word" data-category="9">Treaty</div>
+            <div class="word" data-category="10">Legislature</div>
+            <div class="word" data-category="9">Protocol</div>
+        </div>
+
+        <!-- Level 4 -->
+        <div id="level4" class="level hidden">
+            <h3>Level 4</h3>
+            <div class="word" data-category="11">Republic</div>
+            <div class="word" data-category="12">Provision</div>
+            <div class="word" data-category="12">Regulation</div>
+            <div class="word" data-category="11">Preamble</div>
+            <div class="word" data-category="12">Statute</div>
+            <div class="word" data-category="11">Democracy</div>
+            <div class="word" data-category="11">Justice</div>
+            <div class="word" data-category="11">Equality</div>
+            <div class="word" data-category="12">Protocol</div>
+            <div class="word" data-category="12">Ordinance</div>
+            <div class="word" data-category="11">Federalism</div>
+            <div class="word" data-category="12">Mandate</div>
+            <div class="word" data-category="12">Treaty</div>
+            <div class="word" data-category="11">Sovereignty</div>
+            <div class="word" data-category="11">Constitution</div>
+        </div>
+
+        <!-- Level 5 -->
+        <div id="level5" class="level hidden">
+            <h3>Level 5</h3>
+            <div class="word" data-category="20">Republic</div>
+            <div class="word" data-category="20">Democracy</div>
+            <div class="word" data-category="21">Provision</div>
+            <div class="word" data-category="21">Statute</div>
+            <div class="word" data-category="21">Regulation</div>
+            <div class="word" data-category="20">Sovereignty</div>
+            <div class="word" data-category="20">Constitution</div>
+            <div class="word" data-category="21">Protocol</div>
+            <div class="word" data-category="20">Justice</div>
+            <div class="word" data-category="20">Equality</div>
+            <div class="word" data-category="21">Ordinance</div>
+            <div class="word" data-category="21">Mandate</div>
+            <div class="word" data-category="21">Treaty</div>
+            <div class="word" data-category="20">Preamble</div>
+            <div class="word" data-category="20">Article</div>
+            <div class="word" data-category="20">Amendment</div>
+            <div class="word" data-category="20">Federalism</div>
+            <div class="word" data-category="21">Covenant</div>
+        </div>
+        <div class="score hidden" id="scoreDisplay"></div>
+        <button class="button hidden" id="restartGame">Go to Home</button>
+    </div>
+    <audio id="winSound" src="won.mp3"></audio>
+    <audio id="clickSound" src="mixkit-classic-click-1117.wav"></audio>
+    <script>
+        let currentLevel = 1;
+        let selectedWords = [];
+        const maxWordsPerLevel = {
+            1: 3,
+            2: 4,
+            3: 6,
+            4: 8,
+            5: 10
+        };
+
+        // Start Game
+        document.getElementById('startGame').addEventListener('click', function() {
+            document.getElementById('welcome').classList.add('hidden');
+            document.getElementById('gameArea').classList.remove('hidden');
+            showLevel(currentLevel);
+        });
+
+        // Show Level
+        function showLevel(level) {
+            document.querySelectorAll('.level').forEach(l => l.classList.add('hidden'));
+            document.getElementById('level' + level).classList.remove('hidden');
+            resetWordSelection(level);
+        }
+
+        // Reset Word Selection
+        function resetWordSelection(level) {
+            selectedWords = [];
+            const maxWords = maxWordsPerLevel[level];
+            document.querySelectorAll('.word').forEach(word => {
+                word.style.backgroundColor = '';
+                word.style.color = '';
+                word.style.pointerEvents = 'auto';
+            });
+        }
+
+        // Word Click Handler
+        document.querySelectorAll('.word').forEach(word => {
+            word.addEventListener('click', function() {
+                if (selectedWords.length < maxWordsPerLevel[currentLevel]) {
+                    selectedWords.push(this);
+                    this.style.backgroundColor = '#28a745';
+                    this.style.color = 'white';
+                    this.style.pointerEvents = 'none';
+                    if (selectedWords.length === maxWordsPerLevel[currentLevel]) {
+                        checkSelection();
+                    }
+                }
+            });
+        });
+        // Check Selection
+        function checkSelection() {
+            const category = selectedWords[0].dataset.category;
+            const allSameCategory = selectedWords.every(word => word.dataset.category === category);
+            if (allSameCategory) {
+                document.getElementById('clickSound').play();
+                currentLevel++;
+                if (currentLevel <= 5) {
+                    showLevel(currentLevel);
+                } else {
+                    document.getElementById('scoreDisplay').textContent = 'You won!';
+                    document.getElementById('scoreDisplay').classList.remove('hidden');
+                    document.getElementById('restartGame').classList.remove('hidden');
+                    document.getElementById('winSound').play();
+                }
+            } else {
+                endGame();
+            }
+        }
+        // End Game
+        function endGame() {
+            document.getElementById('scoreDisplay').textContent = 'Game Over! You did not select words from the same category.';
+            document.getElementById('scoreDisplay').classList.remove('hidden');
+            document.getElementById('restartGame').classList.remove('hidden');
+        }
+        // Restart Game
+        document.getElementById('restartGame').addEventListener('click', function() {
+            document.getElementById('scoreDisplay').classList.add('hidden');
+            document.getElementById('restartGame').classList.add('hidden');
+            currentLevel = 1;
+            resetWordSelection(currentLevel);
+            document.getElementById('welcome').classList.remove('hidden');
+            document.getElementById('gameArea').classList.add('hidden');
+        });
+    </script>
+</body>
 </html>
