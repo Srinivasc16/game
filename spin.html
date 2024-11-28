@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Constitution Spin Wheel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      margin-top: 50px;
+    }
+    .wheel-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+    }
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: relative;
+      transform: rotate(0deg);
+      transition: transform 4s ease-out;
+    }
+    .section {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      background-color: transparent;
+      transform-origin: 100% 100%;
+      clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
+      border: 2px solid #fff;
+    }
+    .section:nth-child(1) { background-color: #f54242; transform: rotate(0deg); }
+    .section:nth-child(2) { background-color: #f5a442; transform: rotate(45deg); }
+    .section:nth-child(3) { background-color: #f5e342; transform: rotate(90deg); }
+    .section:nth-child(4) { background-color: #42f55d; transform: rotate(135deg); }
+    .section:nth-child(5) { background-color: #42b3f5; transform: rotate(180deg); }
+    .section:nth-child(6) { background-color: #8d42f5; transform: rotate(225deg); }
+    .section:nth-child(7) { background-color: #f542c2; transform: rotate(270deg); }
+    .section:nth-child(8) { background-color: #a8a8a8; transform: rotate(315deg); }
+
+    .label {
+      position: absolute;
+      width: 120%;
+      height: 120%;
+      top: -10%;
+      left: -15%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform-origin: 100% 100%;
+      font-size: 14px;
+      font-weight: bold;
+      color: #fff;
+      text-align: center;
+    }
+    .pointer {
+      position: absolute;
+      top: calc(50% - 10px);
+      left: 50%;
+      width: 20px;
+      height: 40px;
+      background-color: #333;
+      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+    .spin-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #0078d7;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .spin-btn:hover {
+      background-color: #0053a4;
+    }
+    .info-box {
+      width: 350px;
+      margin-left: 20px;
+      padding: 20px;
+      background-color: #fffcf5;
+      border: 2px solid #ff9933;
+      border-radius: 10px;
+      text-align: left;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .info-box h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      color: #138808;
+      text-align: center;
+    }
+    .info-box p {
+      font-size: 14px;
+      color: #333;
+    }
+    .info-box iframe {
+      margin-top: 10px;
+      width: 100%;
+      height: 150px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Constitution of India Spin Wheel</h1>
+  <div class="container">
+    <div class="wheel-container">
+      <div class="pointer"></div>
+      <div id="wheel" class="wheel">
+        <div class="section">
+          <div class="label" style="transform: rotate(22.5deg);">Preamble</div>
+        </div>
+        <div class="section">
+          <div class="label" style="transform: rotate(67.5deg);">Fundamental Rights</div>
+        </div>
+        <div class="section">
+          <div class="label" style="transform: rotate(112.5deg);">Directive Principles</div>
+        </div>
+        <div class="section">
+          <div class="label" style="transform: rotate(157.5deg);">Fundamental Duties</div>
+        </div>
+        <div class="section">
+          <div class="label" style="transform: rotate(202.5deg);">Union & State</div>
+        </div>
+        <div class="section">
+          <div class="label" style="transform: rotate(247.5deg);">Amendments</div>
+        </div>
+        <div class="section">
+          <div class="label" style="transform: rotate(292.5deg);">Judiciary</div>
+        </div>
+        <div class="section">
+          <div class="label" style="transform: rotate(337.5deg);">Schedules</div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box" id="infoBox">
+      <h3>Spin to Learn</h3>
+      <p>Explore the Constitution of India by spinning the wheel!</p>
+    </div>
+  </div>
+  <button class="spin-btn" onclick="spinWheel()">Spin the Wheel</button>
+
+  <script>
+    let rotation = 0;
+    const wheel = document.getElementById("wheel");
+    const infoBox = document.getElementById("infoBox");
+
+    const sections = [
+      {
+        title: "Preamble",
+        description: "The Preamble outlines the objectives of the Constitution, including justice, liberty, equality, and fraternity.",
+        video: "https://www.youtube.com/embed/samplePreamble"
+      },
+      {
+        title: "Fundamental Rights",
+        description: "Fundamental Rights ensure basic freedoms and rights to all citizens.",
+        video: "https://www.youtube.com/embed/sampleFundamentalRights"
+      },
+      {
+        title: "Directive Principles",
+        description: "Directive Principles guide the state in policy-making.",
+        video: "https://www.youtube.com/embed/sampleDirectivePrinciples"
+      },
+      {
+        title: "Fundamental Duties",
+        description: "Fundamental Duties remind citizens of their responsibilities.",
+        video: "https://www.youtube.com/embed/sampleFundamentalDuties"
+      },
+      {
+        title: "Union & State",
+        description: "Defines the structure and powers of the Union and State governments.",
+        video: "https://www.youtube.com/embed/sampleUnionState"
+      },
+      {
+        title: "Amendments",
+        description: "The Constitution has provisions for amendments to adapt to changes.",
+        video: "https://www.youtube.com/embed/sampleAmendments"
+      },
+      {
+        title: "Judiciary",
+        description: "Explains the structure and functions of the Judiciary.",
+        video: "https://www.youtube.com/embed/sampleJudiciary"
+      },
+      {
+        title: "Schedules",
+        description: "Schedules provide additional details on various aspects of the Constitution.",
+        video: "https://www.youtube.com/embed/sampleSchedules"
+      }
+    ];
+
+    function spinWheel() {
+      const randomSpin = Math.floor(Math.random() * 360 + 1800); // 5 full spins plus random
+      rotation += randomSpin;
+      wheel.style.transform = `rotate(${rotation}deg)`;
+
+      // Announce prize after spin
+      setTimeout(() => {
+        const normalizedRotation = rotation % 360;
+        const sectionIndex = Math.floor((360 - normalizedRotation) / 45) % 8;
+        const section = sections[sectionIndex];
+
+        // Update info box
+        infoBox.innerHTML = `
+          <h3>${section.title}</h3>
+          <p>${section.description}</p>
+          <iframe src="${section.video}" frameborder="0" allowfullscreen></iframe>
+        `;
+      }, 4000);
+    }
+  </script>
+</body>
+</html>
+                              

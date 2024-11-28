@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indian Constitution Learning Game</title>
+  <style>
+    :root {
+      --primary-color: #FF9933;
+      --secondary-color: #FFFFFF;
+      --tertiary-color: #138808;
+      --background-color: #f0f4f8;
+      --text-color: #333;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .game-container {
+      background-color: var(--secondary-color);
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 30px;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .header {
+      text-align: center;
+      color: var(--tertiary-color);
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+
+    .game-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      font-size: 1rem;
+      background-color: #f1f1f1;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      justify-content: center;
+    }
+
+    .card {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--tertiary-color));
+      border-radius: 15px;
+      perspective: 1000px;
+      height: 400px;
+      transition: all 0.3s ease;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      border-radius: 15px;
+    }
+
+    .card-front {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--tertiary-color));
+      color: var(--text-color);
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, var(--tertiary-color), var(--secondary-color), var(--primary-color));
+      transform: rotateY(180deg);
+      color: var(--secondary-color);
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: var(--text-color);
+    }
+
+    .card-body {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    .card-input {
+      width: 100%;
+      padding: 10px;
+      margin: 15px 0;
+      border: 2px solid var(--tertiary-color);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .check-btn {
+      background-color: var(--tertiary-color);
+      color: white;
+    }
+
+    .info-btn {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .next-btn {
+      background-color: var(--primary-color);
+      color: white;
+      display: none;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+      transform: scale(1.05);
+    }
+
+    .info-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .info-popup-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      width: 80%;
+      max-width: 600px;
+      max-height: 70%;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .close-info {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .card-container {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="header">Indian Constitution Learning Game</div>
+    <div class="game-stats">
+      <div>Points: <span id="points">0</span></div>
+      <div>Set: <span id="current-set">1</span>/<span id="total-sets">2</span></div>
+      <div>Difficulty: Easy</div>
+    </div>
+    <div class="card-container"></div>
+    <div class="text-center mt-4">
+      <button class="btn next-btn" id="next-btn">Next Set</button>
+    </div>
+  </div>
+
+  <div class="info-popup" id="info-popup">
+    <div class="info-popup-content">
+      <button class="close-info" id="close-info">×</button>
+      <div id="info-content"></div>
+    </div>
+  </div>
+
+  <script>
+    const cardSets = [
+  // Existing first two sets...
+  [
+    { 
+      title: "Article 19", 
+      body: "Right to Freedom of Speech", 
+      year: 1949, 
+      info: "Article 19 is a cornerstone of Indian democracy, granting citizens the fundamental right to freedom of speech and expression. It allows individuals to express their opinions, criticize the government, and engage in open dialogue without fear of persecution. However, this right is not absolute and comes with reasonable restrictions to maintain public order, decency, and national security."
+    },
+    { 
+      title: "Article 14", 
+      body: "Equality before the Law", 
+      year: 1949, 
+      info: "Article 14 embodies the principle of equality, ensuring that no citizen is discriminated against based on race, gender, religion, or social status. It guarantees equal protection under the law and prohibits arbitrary treatment by the state. This article is crucial in promoting social justice and preventing discrimination in all forms of governance and social interactions."
+    },
+    { 
+      title: "Article 21", 
+      body: "Right to Life and Personal Liberty", 
+      year: 1949, 
+      info: "Often called the 'heart of fundamental rights', Article 21 protects the right to life and personal liberty. The Supreme Court has interpreted this broadly, expanding it to include the right to dignity, health, education, and a clean environment. It ensures that no person can be deprived of their life or personal liberty except through a fair, just, and reasonable procedure established by law."
+    }
+  ],
+  [
+    { 
+      title: "Amendment 42", 
+      body: "Added 'Socialist', 'Secular'", 
+      year: 1976, 
+      info: "The 42nd Amendment, passed during the Emergency period, was a significant modification to the Constitution. It added the words 'Socialist' and 'Secular' to the Preamble, emphasizing India's commitment to social and economic equality, and religious neutrality. This amendment reflected the government's vision of creating a more inclusive and just society."
+    },
+    { 
+      title: "Amendment 44", 
+      body: "Repealed Right to Property", 
+      year: 1978, 
+      info: "The 44th Amendment removed the Right to Property as a fundamental right, transforming it into a legal right. This change allowed the government more flexibility in land redistribution and implementing social welfare policies. It was a crucial step in addressing economic inequalities and enabling land reforms in post-independence India."
+    },
+    { 
+      title: "Article 32", 
+      body: "Right to Constitutional Remedies", 
+      year: 1949, 
+      info: "Described by Dr. B.R. Ambedkar as the 'heart and soul' of the Constitution, Article 32 empowers citizens to directly approach the Supreme Court for the enforcement of fundamental rights. It provides a constitutional mechanism to protect individual liberties and hold the government accountable, making the judiciary a guardian of citizens' rights."
+    }
+  ],
+  // New Sets Start Here
+  [
+    {
+      title: "Article 15",
+      body: "Prohibition of Discrimination",
+      year: 1949,
+      info: "Article 15 prohibits discrimination on grounds of religion, race, caste, sex, or place of birth. It ensures that the state cannot discriminate against citizens and also allows special provisions for women, children, and socially disadvantaged groups to promote equality."
+    },
+    {
+      title: "Article 17",
+      body: "Abolition of Untouchability",
+      year: 1949,
+      info: "Article 17 abolishes untouchability and forbids its practice in any form. It is a powerful constitutional provision that aims to eradicate the social evil of caste-based discrimination and ensure dignity for all citizens, regardless of their social background."
+    },
+    {
+      title: "Article 25",
+      body: "Freedom of Religion",
+      year: 1949,
+      info: "Article 25 guarantees freedom of conscience and the right to freely profess, practice, and propagate religion. It ensures religious freedom while allowing the state to regulate religious practices for public order, morality, and health."
+    }
+  ],
+  [
+    {
+      title: "Amendment 73",
+      body: "Panchayati Raj System",
+      year: 1992,
+      info: "The 73rd Amendment introduced the Panchayati Raj system, mandating regular elections for local self-government in rural areas. It empowered local communities by creating a three-tier system of panchayats and reserving seats for women and marginalized communities."
+    },
+    {
+      title: "Amendment 74",
+      body: "Urban Local Bodies",
+      year: 1992,
+      info: "Complementing the 73rd Amendment, the 74th Amendment provided constitutional status to urban local bodies. It aimed to decentralize power and improve governance by creating municipalities with elected representatives and defined powers."
+    },
+    {
+      title: "Article 370",
+      body: "Special Status of Jammu and Kashmir",
+      year: 1954,
+      info: "Originally granted special autonomous status to Jammu and Kashmir, allowing it to have its own constitution and significant legislative autonomy. Notably, this article was abrogated in 2019, fundamentally changing the region's constitutional position."
+    }
+  ],
+  [
+    {
+      title: "Article 38",
+      body: "Social Order for Welfare",
+      year: 1949,
+      info: "Article 38 directs the state to secure a social order for the promotion of welfare of the people. It emphasizes minimizing inequalities in income, status, facilities, and opportunities, forming the basis of India's commitment to social justice."
+    },
+    {
+      title: "Article 39A",
+      body: "Equal Justice and Free Legal Aid",
+      year: 1976,
+      info: "Added by the 42nd Amendment, Article 39A ensures that the legal system promotes justice on the basis of equal opportunity and provides free legal aid to ensure that opportunities for securing justice are not denied to any citizen."
+    },
+    {
+      title: "Amendment 86",
+      body: "Right to Education",
+      year: 2002,
+      info: "The 86th Amendment made education a fundamental right for children aged 6-14 years. It made free and compulsory education a constitutional obligation of the state, significantly advancing educational opportunities for all children."
+    }
+  ],
+  [
+    {
+      title: "Article 48A",
+      body: "Protection of Environment",
+      year: 1976,
+      info: "Added by the 42nd Amendment, Article 48A mandates the state to protect and improve the environment and safeguard forests and wildlife. It represents an early constitutional commitment to environmental conservation."
+    },
+    {
+      title: "Article 51A",
+      body: "Fundamental Duties",
+      year: 1976,
+      info: "Introduced by the 42nd Amendment, this article outlines the fundamental duties of citizens, including protecting the environment, developing scientific temper, and respecting the national flag and constitution."
+    },
+    {
+      title: "Amendment 97",
+      body: "Goods and Services Tax",
+      year: 2016,
+      info: "The 101st Amendment introduced the Goods and Services Tax (GST), creating a unified national market by replacing multiple state and central taxes, significantly transforming India's economic landscape."
+    }
+  ],
+  [
+    {
+      title: "Article 16",
+      body: "Equality of Opportunity in Public Employment",
+      year: 1949,
+      info: "Article 16 ensures equal opportunities in public employment and prohibits discrimination based on religion, race, caste, sex, descent, place of birth, or residence. It also allows reservations for disadvantaged groups."
+    },
+    {
+      title: "Article 23",
+      body: "Prohibition of Human Trafficking",
+      year: 1949,
+      info: "Article 23 prohibits human trafficking and forced labor, making it a fundamental right. It empowers the state to take actions against any form of human exploitation."
+    },
+    {
+      title: "Amendment 101",
+      body: "Reservation for SC/ST/OBC",
+      year: 2018,
+      info: "This amendment provided 10% reservation for economically weaker sections in general category, expanding the scope of affirmative action beyond caste-based reservations."
+    }
+  ],
+  [
+    {
+      title: "Article 44",
+      body: "Uniform Civil Code",
+      year: 1949,
+      info: "A Directive Principle that recommends the state to secure a Uniform Civil Code, aiming to replace personal laws based on religious scriptures with a common set of rules governing every citizen."
+    },
+    {
+      title: "Article 45",
+      body: "Early Childhood Care and Education",
+      year: 1949,
+      info: "Directs the state to provide free and compulsory education for children until they complete the age of fourteen years, emphasizing the importance of childhood development."
+    },
+    {
+      title: "Amendment 102",
+      body: "National Judicial Appointments Commission",
+      year: 2014,
+      info: "Attempted to change the judicial appointments process, but was later struck down by the Supreme Court, maintaining the existing collegium system."
+    }
+  ],
+  [
+    {
+      title: "Article 29",
+      body: "Protection of Cultural and Educational Rights",
+      year: 1949,
+      info: "Protects the rights of minorities to conserve their unique language, script, and culture. It ensures that no citizen shall be denied admission to educational institutions on grounds of religion, race, caste, or language."
+    },
+    {
+      title: "Article 30",
+      body: "Right of Minorities to Establish Educational Institutions",
+      year: 1949,
+      info: "Allows minorities, both religious and linguistic, to establish and administer their own educational institutions, promoting educational diversity and cultural preservation."
+    },
+    {
+      title: "Amendment 93",
+      body: "Reservation in Promotions for SC/ST",
+      year: 2012,
+      info: "Validated state laws providing reservation in promotions for Scheduled Castes and Scheduled Tribes, addressing historical social inequalities."
+    }
+  ],
+  [
+    {
+      title: "Article 35",
+      body: "Power of Parliament to Legislate",
+      year: 1949,
+      info: "Empowers Parliament to make laws implementing the fundamental rights, ensuring that constitutional guarantees can be effectively enforced through appropriate legislation."
+    },
+    {
+      title: "Article 37",
+      body: "Directive Principles Non-Justiciable",
+      year: 1949,
+      info: "Clarifies that Directive Principles are not legally enforceable but fundamental in the governance of the country and must be applied by the state in making laws."
+    },
+    {
+      title: "Amendment 100",
+      body: "Anti-Defection Law",
+      year: 2003,
+      info: "Strengthened provisions to prevent political defections, ensuring stability in legislative bodies and discouraging horse-trading of legislators."
+    }
+  ]
+];
+
+    class ConstitutionCardGame {
+      constructor(cardSets) {
+        this.cardSets = cardSets;
+        this.currentSetIndex = 0;
+        this.points = 0;
+
+        this.container = document.querySelector('.card-container');
+        this.pointsDisplay = document.getElementById('points');
+        this.nextButton = document.getElementById('next-btn');
+        this.infoPopup = document.getElementById('info-popup');
+        this.infoContent = document.getElementById('info-content');
+        this.closeInfo = document.getElementById('close-info');
+        this.currentSetDisplay = document.getElementById('current-set');
+        this.totalSetsDisplay = document.getElementById('total-sets');
+
+        this.totalSetsDisplay.textContent = this.cardSets.length;
+        this.setupEventListeners();
+        this.loadSet();
+      }
+
+      setupEventListeners() {
+        this.nextButton.addEventListener('click', () => this.nextSet());
+        this.closeInfo.addEventListener('click', () => this.hideInfoPopup());
+        this.container.addEventListener('transitionend', () => this.checkAllCardsFlipped());
+      }
+
+      loadSet() {
+        this.container.innerHTML = '';
+        const currentSet = this.cardSets[this.currentSetIndex];
+        
+        currentSet.forEach(data => {
+          const card = this.createCard(data);
+          this.container.appendChild(card);
+        });
+
+        this.currentSetDisplay.textContent = this.currentSetIndex + 1;
+        this.nextButton.style.display = 'none';
+      }
+
+      createCard(data) {
+        const card = document.createElement('div');
+        card.classList.add('card');
+
+        card.innerHTML = `
+          <div class="card-inner">
+            <div class="card-front">
+              <div class="card-title">${data.title}</div>
+              <div class="card-body">${data.body}</div>
+              <input type="number" class="card-input" placeholder="Enter Year">
+              <div>
+                <button class="btn check-btn">Check Year</button>
+                <button class="btn info-btn">More Info</button>
+              </div>
+            </div>
+            <div class="card-back">
+              <div class="result">Correct Year: ${data.year}</div>
+            </div>
+          </div>
+        `;
+
+        const checkButton = card.querySelector('.check-btn');
+        const infoButton = card.querySelector('.info-btn');
+        const input = card.querySelector('.card-input');
+
+        checkButton.addEventListener('click', () => this.checkYear(card, input, data));
+        infoButton.addEventListener('click', () => this.showInfo(data));
+
+        return card;
+      }
+
+      checkYear(card, input, data) {
+        const enteredYear = parseInt(input.value);
+        const backContent = card.querySelector('.card-back .result');
+
+        if (enteredYear === data.year) {
+          this.points += 10;
+          backContent.textContent = `Correct! Year: ${data.year}`;
+          backContent.style.color = 'green';
+        } else {
+          backContent.textContent = `Wrong! Correct Year: ${data.year}`;
+          backContent.style.color = 'red';
+        }
+
+        this.pointsDisplay.textContent = this.points;
+        card.classList.add('flipped');
+      }
+
+      showInfo(data) {
+        this.infoContent.textContent = data.info;
+        this.infoPopup.style.display = 'flex';
+      }
+
+      hideInfoPopup() {
+        this.infoPopup.style.display = 'none';
+      }
+
+      nextSet() {
+        if (this.currentSetIndex < this.cardSets.length - 1) {
+          this.currentSetIndex++;
+          this.loadSet();
+        }
+      }
+
+      checkAllCardsFlipped() {
+        const allCardsFlipped = Array.from(document.querySelectorAll('.card'))
+          .every(card => card.classList.contains('flipped'));
+
+        if (allCardsFlipped && this.currentSetIndex < this.cardSets.length - 1) {
+          this.nextButton.style.display = 'block';
+        }
+      }
+    }
+
+    // Initialize the game
+    new ConstitutionCardGame(cardSets);
+  </script>
+</body>
+</html>

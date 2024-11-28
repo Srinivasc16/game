@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monopoly Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    /* ================= */
+/* TYPOGRAPHY */
+/* ================= */
+body {
+    font-family: 'Oswald', sans-serif;
+  }
+  
+  /* ================= */
+  /* COLORS */
+  /* ================= */
+  :root {
+    --black: #080808;
+    --brown: #640303;
+    --board: #fafaf8;
+    --dark-purple: #5e3577;
+    --light-blue: #d2eaf5;
+    --purple: #b02f7c;
+    --orange: #fa811d;
+    --red: #f50c2b;
+    --yellow: #ffed20;
+    --green: #41994e;
+    --dark-blue: #5a6dba;
+  }
+  
+  /* ================= */
+  /* GLOBAL */
+  /* ================= */
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    background-color: #41994e;
+    background-position: center;
+    background-repeat: repeat;
+    background-size: 100px;
+    font-weight: 400;
+    font-size: 10px;
+    color: var(--black);
+    text-transform: uppercase;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+  }
+  
+  /* Property colors */
+  .dark-purple { background: var(--dark-purple); }
+  .light-blue  { background: var(--light-blue); }
+  .purple      { background: var(--purple); }
+  .orange      { background: var(--orange); }
+  .red         { background: var(--red); }
+  .yellow      { background: var(--yellow); }
+  .green       { background: var(--green); }
+  .dark-blue   { background: var(--dark-blue); }
+  
+  /* ================= */
+  /* LAYOUT */
+  /* ================= */
+  
+  /* Table and board */
+  .table {
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+  
+  .board {
+    display: grid;
+    grid-template-columns: 125px repeat(9, 80px) 125px;
+    grid-template-rows: 125px repeat(9, 80px) 125px;
+    grid-gap: 2px;
+    margin: 50px auto;
+    width: 994px;
+    height: 994px;
+    background: var(--black);
+    border: 2px solid var(--black);
+  }
+  
+  .center {
+    grid-column: 2 / 11;
+    grid-row: 2 / 11;
+    background: var(--board);
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    justify-items: center;
+    align-items: center;
+  }
+  
+  .title {
+    grid-column: 1 / 9;
+    grid-row: 4;
+    font-size: 90px;
+    font-weight: 400;
+    letter-spacing: 12px;
+  }
+  
+  .community-chest-deck {
+    grid-column: 2 / 4;
+    grid-row: 2 / 4;
+    transform: rotate(135deg);
+    margin-bottom: 60px;
+    margin-right: 60px;
+  }
+  
+  .chance-deck {
+    grid-column: 5 / 7;
+    grid-row: 5 / 7;
+    transform: rotate(315deg);
+    margin-top: 60px;
+    margin-left: 60px;
+  }
+  
+  .label {
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: 3px;
+    padding-bottom: 10px;
+  }
+  
+  .deck {
+    border: 2px dashed var(--black);
+    width: 160px;
+    height: 120px;
+  }
+  
+  /* Rows of spaces */
+  .row {
+    display: grid;
+    grid-gap: 2px;
+  }
+  
+  .horizontal-row {
+    grid-template-columns: repeat(9, 80px);
+    grid-template-rows: 125px;
+  }
+  
+  .vertical-row {
+    grid-template-columns: 125px;
+    grid-template-rows: repeat(9, 80px);
+  }
+  
+  .bottom-row {
+    grid-column: 2 / 11;
+    grid-row: 11;
+  }
+  
+  .left-row {
+    grid-column: 1;
+    grid-row: 2 / 11;
+  }
+  
+  .top-row {
+    grid-column: 2 / 11;
+    grid-row: 1;
+  }
+  
+  .right-row {
+    grid-column: 11;
+    grid-row: 2 / 11;
+  }
+  
+  /* ================= */
+  /* SPACES */
+  /* ================= */
+  
+  /* Types of spaces */
+  .space {
+    background: var(--board);
+    text-align: center;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    transform-origin: center;
+    height: 125px;
+    width: 80px;
+  }
+  
+  .name,
+  .instructions {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  .price {
+    font-size: 7px;
+    font-weight: 400;
+    padding-bottom: 5px;
+  }
+  
+  .corner .container {
+    justify-content: space-around;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .corner .name {
+    padding: 0;
+  }
+  
+  .property .color-bar {
+    height: 25px;
+    border-bottom: 2px solid var(--black);
+  }
+  
+  .property .name {
+    padding-bottom: 50px;
+  }
+  
+  .railroad .name {
+    padding-top: 10px;
+  }
+  
+  .railroad .drawing {
+    font-size: 60px;
+    color: var(--black);
+  }
+  
+  .utility .name {
+    padding-top: 10px;
+  }
+  
+  .utility .drawing {
+    font-size: 70px;
+  }
+  
+  .fee .name {
+    padding-top: 10px;
+    font-size: 14px;
+  }
+  
+  .fee .instructions {
+    font-size: 10px;
+  }
+  
+  /* Specific spaces */
+  .go {
+    grid-column: 11;
+    grid-row: 11 / 12;
+    position: relative;
+  }
+  
+  .go .container {
+    justify-content: flex-start;
+    transform: rotate(315deg);
+  }
+  
+  .go .instructions {
+    padding: 0 30px;
+  }
+  
+  .go .go-word {
+    font-size: 60px;
+    color: var(--red);
+  }
+  
+  .go .arrow {
+    font-size: 45px;
+    color: var(--red);
+    position: absolute;
+    bottom: -10px;
+    left: 5px;
+  }
+  
+  .jail {
+    grid-column: 1;
+    grid-row: 11 / 12;
+    display: grid;
+    grid-template-columns: repeat(10, 12.5px);
+    grid-template-rows: repeat(10, 12.5px);
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .jail .drawing {
+    grid-column: 4 / 11;
+    grid-row: 1 / 8;
+    width: 87.5px;
+    height: 87.5px;
+    background: var(--orange);
+    border-bottom: 2px solid var(--black);
+    border-left: 2px solid var(--black);
+  }
+  
+  .jail .just {
+    grid-column: 3;
+    grid-row: 4;
+    transform: rotate(90deg);
+    padding-top: 5px;
+  }
+  
+  .jail .visiting {
+    grid-column: 6;
+    grid-row: 8;
+    padding-top: 5px;
+  }
+  
+  .jail .container {
+    align-items: center;
+    transform: rotate(45deg);
+  }
+  
+  .jail .name {
+    font-size: 14px;
+  }
+  
+  .jail .window {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: relative;
+    width: 55px;
+    height: 55px;
+    background: var(--board);
+    border: 2px solid var(--black);
+  }
+  
+  .jail .person {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    font-size: 40px;
+  }
+  
+  .jail .bar {
+    height: 55px;
+    width: 2px;
+    background: var(--black);
+  }
+  
+  .free-parking {
+    grid-column: 1;
+    grid-row: 1 / 2;
+  }
+  
+  .free-parking .container {
+    justify-content: center;
+    transform: rotate(135deg);
+  }
+  
+  .free-parking .name {
+    font-size: 16px;
+  }
+  
+  .free-parking .drawing {
+    font-size: 60px;
+    color: var(--red);
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  
+  .go-to-jail {
+    grid-column: 11;
+    grid-row: 1 / 1;
+  }
+  
+  .go-to-jail .container {
+    justify-content: center;
+    transform: rotate(225deg);
+  }
+  
+  .go-to-jail .name {
+    font-size: 16px;
+  }
+  
+  .go-to-jail .drawing {
+    font-size: 60px;
+    color: var(--brown);
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  
+  .chance .container {
+    justify-content: center;
+  }
+  
+  .chance .drawing {
+    font-size: 90px;
+    color: var(--red);
+  }
+  
+  .chance .blue {
+    color: var(--dark-blue);
+  }
+  
+  .community-chest .container {
+    justify-content: space-around;
+  }
+  
+  .community-chest .drawing {
+    font-size: 50px;
+    color: var(--light-blue);
+  }
+  
+  .community-chest .instructions {
+    font-size: 8px;
+  }
+  
+  .electric-company .drawing {
+    color: var(--yellow);
+  }
+  
+  .waterworks .drawing {
+    color: var(--dark-blue);
+  }
+  
+  .income-tax .container {
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .income-tax .name {
+    padding-bottom: 5px;
+  }
+  
+  .income-tax .diamond {
+    width: 5px;
+    height: 5px;
+    background: var(--black);
+    transform: rotate(45deg);
+    display: inline-block;
+  }
+  
+  .income-tax .instructions {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  
+  .luxury-tax .drawing {
+    font-size: 50px;
+  }
+  
+  .luxury-tax .instructions {
+    padding-bottom: 5px;
+  }
+  
+  /* ================= */
+  /* UTILITY */
+  /* ================= */
+  
+  .long-name {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  
+  .three-line-name {
+    position: relative;
+    top: 5px;
+  }
+  
+  #game-setup {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 1000;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  }
+  
+  .setup-panel h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .player-input {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .player-input input, 
+  .player-input select {
+    margin-bottom: 10px;
+    padding: 5px;
+  }
+  
+  #start-game {
+    width: 100%;
+    padding: 10px;
+    background-color: #41994e;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  #game-status {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 250px;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 1000;
+    padding: 20px;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+  }
+  
+  .player-status h3 {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  .player-info {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+  }
+  
+  .game-controls {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  #roll-dice {
+    padding: 10px 20px;
+    background-color: #41994e;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  #dice-result {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  .game-container {
+    display: flex;
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+  
+  .side-panel {
+    width: 250px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    overflow-y: auto;
+  }
+  
+  .board-wrapper {
+    flex-grow: 1;
+    overflow-x: auto;
+  }
+    /* Previous CSS styles remain the same */
+
+    /* Player token styles */
+    .player-tokens {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .player-token {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin: 0 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    #game-status {
+      /* Existing styles */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .player-status {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    .player-status .player-token {
+      margin-right: 10px;
+    }
+    #game-setup-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      font-family: 'Oswald', sans-serif;
+    }
+
+    .game-setup-content {
+      background-color: var(--board);
+      padding: 30px;
+      border-radius: 10px;
+      width: 500px;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+      border: 4px solid var(--black);
+    }
+
+    .game-setup-content h2 {
+      color: var(--black);
+      margin-bottom: 20px;
+      font-size: 2.5rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .game-setup-content h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 3px;
+      background-color: var(--green);
+    }
+
+    .player-setup-section {
+      margin-bottom: 20px;
+      background-color: rgba(65, 153, 78, 0.1);
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .player-setup-section label {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--black);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    #num-players {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 2px solid var(--green);
+      border-radius: 5px;
+      background-color: white;
+      font-family: 'Oswald', sans-serif;
+      text-transform: uppercase;
+    }
+
+    #player-names-container {
+      display: grid;
+      gap: 15px;
+    }
+
+    .player-name-input {
+      position: relative;
+    }
+
+    .player-name-input input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid var(--green);
+      border-radius: 5px;
+      font-family: 'Oswald', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .player-name-input input:focus {
+      outline: none;
+      border-color: var(--dark-blue);
+      box-shadow: 0 0 10px rgba(65, 153, 78, 0.2);
+    }
+
+    .player-name-input input.error {
+      border-color: var(--red);
+    }
+
+    #start-game-btn {
+      width: 100%;
+      padding: 15px;
+      background-color: var(--green);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #start-game-btn:hover {
+      background-color: var(--dark-blue);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #start-game-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Monopoly-themed decorative elements */
+    .game-setup-content::before,
+    .game-setup-content::after {
+      content: '🎲';
+      position: absolute;
+      font-size: 3rem;
+      opacity: 0.2;
+    }
+
+    .game-setup-content::before {
+      top: 10px;
+      left: 10px;
+      transform: rotate(-20deg);
+    }
+
+    .game-setup-content::after {
+      bottom: 10px;
+      right: 10px;
+      transform: rotate(20deg);
+    }
+    .dice-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    .dice {
+      width: 50px;
+      height: 50px;
+      background-color: white;
+      border: 2px solid var(--black);
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 10px;
+      font-size: 30px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .current-turn {
+      border: 3px solid var(--green);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(65, 153, 78, 0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(65, 153, 78, 0); }
+    }
+
+    .player-status .turn-indicator {
+      margin-left: 10px;
+      font-size: 0.8rem;
+      color: var(--green);
+      font-weight: bold;
+    }
+    .player-piece {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .board-space-overlay {
+      position: relative;
+      z-index: 5;
+    }
+  </style>
+</head>
+<body>
+  <!-- Game Setup Modal -->
+  <div id="game-setup-modal">
+    <div class="game-setup-content">
+      <h2>Monopoly Game Setup</h2>
+      
+      <div class="player-setup-section">
+        <label for="num-players">Number of Players:</label>
+        <select id="num-players">
+          <option value="2">2 Players</option>
+          <option value="3">3 Players</option>
+          <option value="4">4 Players</option>
+          <option value="5">5 Players</option>
+          <option value="6">6 Players</option>
+        </select>
+      </div>
+
+      <div id="player-names-container">
+        <!-- Player name inputs will be dynamically generated -->
+      </div>
+
+      <div id="player-tokens-preview" class="player-tokens">
+        <!-- Player tokens will be dynamically generated -->
+      </div>
+
+      <button id="start-game-btn">Start Game</button>
+    </div>
+  </div>
+
+  <!-- Game Status Panel -->
+  <div id="game-status">
+    <h2>Player Status</h2>
+    <div id="players-list">
+      <!-- Player status will be dynamically added here -->
+    </div>
+    <div class="game-controls">
+      <button id="roll-dice">Roll Dice</button>
+      <div id="dice-result"></div>
+    </div>
+  </div>
+
+  <!-- Existing Monopoly board HTML from paste.txt -->
+  <div class="table">
+    <div class="board">
+      <div class="center">
+        <div class="community-chest-deck">
+          <h2 class="label">Community Chest</h2>
+          <div class="deck"></div>
+        </div>
+        <h1 class="title">MONOPOLY</h1>
+        <div class="chance-deck">
+          <h2 class="label">Chance</h2>
+          <div class="deck"></div>
+        </div>
+      </div>
+  
+      <div class="space corner go">
+        <div class="container">
+          <div class="instructions">Collect $200.00 salary as you pass</div>
+          <div class="go-word">go</div>
+        </div>
+        <div class="arrow fa fa-long-arrow-left"></div>
+      </div>
+  
+      <div class="row horizontal-row bottom-row">
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar light-blue"></div>
+            <div class="name">Connecticut Avenue</div>
+            <div class="price">PRICE $120</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar light-blue"></div>
+            <div class="name">Vermont Avenue</div>
+            <div class="price">Price $100</div>
+          </div>
+        </div>
+        <div class="space chance">
+          <div class="container">
+            <div class="name">Chance</div>
+            <i class="drawing fa fa-question"></i>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar light-blue"></div>
+            <div class="name">Oriental Avenue</div>
+            <div class="price">Price $100</div>
+          </div>
+        </div>
+        <div class="space railroad">
+          <div class="container">
+            <div class="name">Reading Railroad</div>
+            <i class="drawing fa fa-subway"></i>
+            <div class="price">Price $200</div>
+          </div>
+        </div>
+        <div class="space fee income-tax">
+          <div class="container">
+            <div class="name">Income Tax</div>
+            <div class="diamond"></div>
+            <div class="instructions">Pay 10%<br>or<br>$200</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar dark-purple"></div>
+            <div class="name">Baltic Avenue</div>
+            <div class="price">Price $50</div>
+          </div>
+        </div>
+        <div class="space community-chest">
+          <div class="container">
+            <div class="name">Community Chest</div>
+            <i class="drawing fa fa-cube"></i>
+            <div class="instructions">Follow instructions on top card</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar dark-purple"></div>
+            <div class="name three-line-name">Mediter-<br>ranean<br>Avenue</div>
+            <div class="price">Price $50</div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="space corner jail">
+        <div class="just">Just</div>
+        <div class="drawing">
+          <div class="container">
+            <div class="name">In</div>
+            <div class="window">
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <i class="person fa fa-frown-o"></i>
+            </div>
+            <div class="name">Jail</div>
+          </div>
+        </div>
+        <div class="visiting">Visiting</div>
+      </div>
+  
+      <div class="row vertical-row left-row">
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar orange"></div>
+            <div class="name">New York Avenue</div>
+            <div class="price">Price $200</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar orange"></div>
+            <div class="name">Tennessee Avenue</div>
+            <div class="price">Price $180</div>
+          </div>
+        </div>
+        <div class="space community-chest">
+          <div class="container">
+            <div class="name">Community Chest</div>
+            <i class="drawing fa fa-cube"></i>
+            <div class="instructions">Follow instructions on top card</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar orange"></div>
+            <div class="name">St. James Avenue</div>
+            <div class="price">Price $180</div>
+          </div>
+        </div>
+        <div class="space railroad">
+          <div class="container">
+            <div class="name long-name">Pennsylvania Railroad</div>
+            <i class="drawing fa fa-subway"></i>
+            <div class="price">Price $200</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar purple"></div>
+            <div class="name">Virginia Avenue</div>
+            <div class="price">Price $160</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar purple"></div>
+            <div class="name">States Avenue</div>
+            <div class="price">Price $140</div>
+          </div>
+        </div>
+        <div class="space utility electric-company">
+          <div class="container">
+            <div class="name">Electric Company</div>
+            <i class="drawing fa fa-lightbulb-o"></i>
+            <div class="price">Price $150</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar purple"></div>
+            <div class="name">St. Charles Place</div>
+            <div class="price">Price $140</div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="space corner free-parking">
+        <div class="container">
+          <div class="name">Free</div>
+          <i class="drawing fa fa-car"></i>
+          <div class="name">Parking</div>
+        </div>
+      </div>
+  
+      <div class="row horizontal-row top-row">
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar red"></div>
+            <div class="name">Kentucky Avenue</div>
+            <div class="price">Price $220</div>
+          </div>
+        </div>
+        <div class="space chance">
+          <div class="container">
+            <div class="name">Chance</div>
+            <i class="drawing fa fa-question blue"></i>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar red"></div>
+            <div class="name">Indiana Avenue</div>
+            <div class="price">Price $220</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar red"></div>
+            <div class="name">Illinois Avenue</div>
+            <div class="price">Price $200</div>
+          </div>
+        </div>
+        <div class="space railroad">
+          <div class="container">
+            <div class="name">B & O Railroad</div>
+            <i class="drawing fa fa-subway"></i>
+            <div class="price">Price $200</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar yellow"></div>
+            <div class="name">Atlantic Avenue</div>
+            <div class="price">Price $260</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar yellow"></div>
+            <div class="name">Ventnor Avenue</div>
+            <div class="price">Price $260</div>
+          </div>
+        </div>
+        <div class="space utility waterworks">
+          <div class="container">
+            <div class="name">Waterworks</div>
+            <i class="drawing fa fa-tint"></i>
+            <div class="price">Price $120</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar yellow"></div>
+            <div class="name">Marvin Gardens</div>
+            <div class="price">Price $280</div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="space corner go-to-jail">
+        <div class="container">
+          <div class="name">Go To</div>
+          <i class="drawing fa fa-gavel"></i>
+          <div class="name">Jail</div>
+        </div>
+      </div>
+  
+      <div class="row vertical-row right-row">
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar green"></div>
+            <div class="name">Pacific Avenue</div>
+            <div class="price">Price $300</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar green"></div>
+            <div class="name three-line-name">North Carolina Avenue</div>
+            <div class="price">Price $300</div>
+          </div>
+        </div>
+        <div class="space community-chest">
+          <div class="container">
+            <div class="name">Community Chest</div>
+            <i class="drawing fa fa-cube"></i>
+            <div class="instructions">Follow instructions on top card</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar green"></div>
+            <div class="name long-name">Pennsylvania Avenue</div>
+            <div class="price">Price $320</div>
+          </div>
+        </div>
+        <div class="space railroad">
+          <div class="container">
+            <div class="name">Short Line</div>
+            <i class="drawing fa fa-subway"></i>
+            <div class="price">Price $200</div>
+          </div>
+        </div>
+        <div class="space chance">
+          <div class="container">
+            <div class="name">Chance</div>
+            <i class="drawing fa fa-question"></i>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar dark-blue"></div>
+            <div class="name">Park Place</div>
+            <div class="price">Price $350</div>
+          </div>
+        </div>
+        <div class="space fee luxury-tax">
+          <div class="container">
+            <div class="name">Luxury Tax</div>
+            <div class="drawing fa fa-diamond"></div>
+            <div class="instructions">Pay $75.00</div>
+          </div>
+        </div>
+        <div class="space property">
+          <div class="container">
+            <div class="color-bar dark-blue"></div>
+            <div class="name">Boardwalk</div>
+            <div class="price">Price $400</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+  // DOM Element Selectors
+  const numPlayersSelect = document.getElementById('num-players');
+  const playerNamesContainer = document.getElementById('player-names-container');
+  const playerTokensPreview = document.getElementById('player-tokens-preview');
+  const playersList = document.getElementById('players-list');
+  const startGameBtn = document.getElementById('start-game-btn');
+  const gameSetupModal = document.getElementById('game-setup-modal');
+  const rollDiceBtn = document.getElementById('roll-dice');
+  const diceResultDisplay = document.getElementById('dice-result');
+  const board = document.querySelector('.board');
+
+  // Monopoly board spaces in order
+  const boardSpaces = [
+    'GO', 'Mediterranean Avenue', 'Baltic Avenue', 'Income Tax', 
+    'Reading Railroad', 'Oriental Avenue', 'Vermont Avenue', 
+    'Connecticut Avenue', 'Jail', 'St. Charles Place', 
+    'Electric Company', 'States Avenue', 'Virginia Avenue', 
+    'Pennsylvania Railroad', 'St. James Place', 'Tennessee Avenue', 
+    'New York Avenue', 'Free Parking', 'Kentucky Avenue', 
+    'Indiana Avenue', 'Illinois Avenue', 'B&O Railroad', 
+    'Atlantic Avenue', 'Ventnor Avenue', 'Water Works', 
+    'Marvin Gardens', 'Go To Jail', 'Pacific Avenue', 
+    'North Carolina Avenue', 'Pennsylvania Avenue', 
+    'Short Line', 'Park Place', 'Boardwalk'
+  ];
+
+  // Monopoly player token colors
+  const playerTokenColors = [
+    '#FF0000',   // Red
+    '#0000FF',   // Blue
+    '#008000',   // Green
+    '#FFA500',   // Orange
+    '#800080',   // Purple
+    '#FFD700'    // Gold
+  ];
+
+  // Token symbols
+  const playerTokenSymbols = [
+    '🚗', // Car
+    '🎩', // Top Hat
+    '🏠', // House
+    '🚢', // Ship
+    '🐱', // Cat
+    '🤖'  // Robot
+  ];
+
+  // Game object to manage game state
+  const Game = (() => {
+    const game = {
+      squares: boardSpaces.map((name, index) => ({
+        name,
+        value: calculatePropertyValue(name),
+        squareID: `square${index + 1}`
+      })),
+      players: [],
+      currentPlayerIndex: 0,
+
+      findSquareByID: function(squareID) {
+        return this.squares.find(square => square.squareID === squareID);
+      },
+
+      checkTile: function(player) {
+        const currentSquare = this.squares[player.position];
+        
+        // Pass GO check
+        if (player.position === 0) {
+          player.money += 200;
+          return `${player.name} passed GO and collected $200`;
+        }
+
+        // Property purchase logic
+        if (currentSquare.value > 0) {
+          if (!currentSquare.owner) {
+            if (player.money >= currentSquare.value) {
+              const confirmPurchase = confirm(`${player.name}, would you like to buy ${currentSquare.name} for $${currentSquare.value}?`);
+              
+              if (confirmPurchase) {
+                player.money -= currentSquare.value;
+                currentSquare.owner = player.name;
+                return `${player.name} purchased ${currentSquare.name} for $${currentSquare.value}`;
+              }
+            } else {
+              return `${player.name} cannot afford ${currentSquare.name}`;
+            }
+          } else if (currentSquare.owner !== player.name) {
+            const rent = Math.floor(currentSquare.value * 0.1);
+            player.money -= rent;
+            return `${player.name} paid $${rent} rent to ${currentSquare.owner}`;
+          }
+        }
+
+        return `${player.name} landed on ${currentSquare.name}`;
+      }
+    };
+
+    return game;
+  })();
+
+  // Helper function to calculate property values
+  function calculatePropertyValue(name) {
+    const propertyValues = {
+      'Mediterranean Avenue': 60,
+      'Baltic Avenue': 60,
+      'Income Tax': 200,
+      'Reading Railroad': 200,
+      'Oriental Avenue': 100,
+      'Vermont Avenue': 100,
+      'Connecticut Avenue': 120,
+      'St. Charles Place': 140,
+      'Electric Company': 150,
+      // Add more property values as needed
+    };
+    return propertyValues[name] || 0;
+  }
+
+  // Players and game state
+  let players = [];
+  let currentPlayerIndex = 0;
+
+  // Generate player inputs
+  function generatePlayerInputs() {
+    const numPlayers = parseInt(numPlayersSelect.value);
+    playerNamesContainer.innerHTML = '';
+    playerTokensPreview.innerHTML = '';
+
+    for (let i = 1; i <= numPlayers; i++) {
+      // Name input
+      const playerInput = document.createElement('div');
+      playerInput.classList.add('player-name-input');
+      playerInput.innerHTML = `
+        <input type="text" id="player-${i}-name" placeholder="Enter Player ${i} Name" required>
+      `;
+      playerNamesContainer.appendChild(playerInput);
+
+      // Token preview
+      const tokenPreview = document.createElement('div');
+      tokenPreview.classList.add('player-token');
+      tokenPreview.style.backgroundColor = playerTokenColors[i-1];
+      tokenPreview.innerHTML = playerTokenSymbols[i-1];
+      tokenPreview.dataset.color = playerTokenColors[i-1];
+      tokenPreview.dataset.symbol = playerTokenSymbols[i-1];
+      playerTokensPreview.appendChild(tokenPreview);
+    }
+  }
+
+  // Place player on board space
+  function placePlayerOnSpace(player, spaceIndex) {
+    // Remove previous player piece
+    const previousPlayerPiece = document.querySelector(`.player-piece[data-player="${player.name}"]`);
+    if (previousPlayerPiece) {
+      previousPlayerPiece.remove();
+    }
+
+    // Create new player piece
+    const playerPiece = document.createElement('div');
+    playerPiece.classList.add('player-piece');
+    playerPiece.style.backgroundColor = player.color;
+    playerPiece.innerHTML = player.symbol;
+    playerPiece.dataset.player = player.name;
+
+    // Style player piece
+    Object.assign(playerPiece.style, {
+      position: 'absolute',
+      width: '20px',
+      height: '20px',
+      borderRadius: '50%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      fontSize: '12px'
+    });
+
+    // Position player piece
+    if (board) {
+      board.appendChild(playerPiece);
+      positionPlayerPiece(playerPiece, spaceIndex);
+    }
+
+    // Update player position
+    player.position = spaceIndex;
+  }
+
+  // Position player piece on the board
+  function positionPlayerPiece(playerPiece, spaceIndex) {
+    const spaceSelectors = [
+      '.go', '.bottom-row .space:nth-child(1)', '.bottom-row .space:nth-child(2)', 
+      '.bottom-row .space:nth-child(3)', '.bottom-row .space:nth-child(4)', 
+      '.bottom-row .space:nth-child(5)', '.bottom-row .space:nth-child(6)', 
+      '.bottom-row .space:nth-child(7)', '.bottom-row .space:nth-child(8)', 
+      '.jail', '.left-row .space:nth-child(1)', '.left-row .space:nth-child(2)', 
+      '.left-row .space:nth-child(3)', '.left-row .space:nth-child(4)', 
+      '.left-row .space:nth-child(5)', '.left-row .space:nth-child(6)', 
+      '.left-row .space:nth-child(7)', '.left-row .space:nth-child(8)', 
+      '.free-parking', '.top-row .space:nth-child(1)', '.top-row .space:nth-child(2)', 
+      '.top-row .space:nth-child(3)', '.top-row .space:nth-child(4)', 
+      '.top-row .space:nth-child(5)', '.top-row .space:nth-child(6)', 
+      '.top-row .space:nth-child(7)', '.top-row .space:nth-child(8)', 
+      '.go-to-jail', '.right-row .space:nth-child(1)', '.right-row .space:nth-child(2)', 
+      '.right-row .space:nth-child(3)', '.right-row .space:nth-child(4)', 
+      '.right-row .space:nth-child(5)', '.right-row .space:nth-child(6)', 
+      '.right-row .space:nth-child(7)', '.right-row .space:nth-child(8)'
+    ];
+
+    const targetSpace = board.querySelectorAll(spaceSelectors[spaceIndex])[0];
+    
+    if (targetSpace) {
+      const spaceRect = targetSpace.getBoundingClientRect();
+      const boardRect = board.getBoundingClientRect();
+      
+      const left = Math.max(0, Math.min(
+        spaceRect.left - boardRect.left + (spaceRect.width / 2) - 10, 
+        boardRect.width - 20
+      ));
+      
+      const top = Math.max(0, Math.min(
+        spaceRect.top - boardRect.top + (spaceRect.height / 2) - 10, 
+        boardRect.height - 20
+      ));
+      
+      playerPiece.style.left = `${left}px`;
+      playerPiece.style.top = `${top}px`;
+    }
+  }
+
+  // Update player status display
+  function updatePlayerStatusDisplay() {
+    playersList.innerHTML = players.map((player, index) => `
+      <div class="player-status ${index === currentPlayerIndex ? 'current-turn' : ''}">
+        <div class="player-token" style="background-color: ${player.color}">
+          ${player.symbol}
+        </div>
+        <div class="player-info">
+          <strong>${player.name}</strong>
+          <div>Money: $${player.money}</div>
+          <div>Position: ${boardSpaces[player.position]}</div>
+          ${player.lastRoll ? `<div>Last Roll: ${player.lastRoll}</div>` : ''}
+        </div>
+        ${index === currentPlayerIndex ? '<div class="turn-indicator">YOUR TURN</div>' : ''}
+      </div>
+    `).join('');
+  }
+
+  // Dice rolling functionality
+  function rollDice() {
+    // Roll one die
+    const totalRoll = Math.floor(Math.random() * 6) + 1;
+
+    // Get current player
+    const currentPlayer = players[currentPlayerIndex];
+
+    // Update current player's last roll
+    currentPlayer.lastRoll = totalRoll;
+
+    // Calculate new position
+    let newPosition = (currentPlayer.position + totalRoll) % boardSpaces.length;
+
+    // Place player on new space
+    placePlayerOnSpace(currentPlayer, newPosition);
+
+    // Check tile actions
+    const actionMessage = Game.checkTile(currentPlayer);
+
+    // Update dice result display
+    diceResultDisplay.innerHTML = `
+      <div class="dice-container" style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+        <div class="dice" style="font-size: 24px;">🎲${totalRoll}</div>
+        <div class="action-message">${actionMessage}</div>
+      </div>
+    `;
+
+    // Update player status display
+    updatePlayerStatusDisplay();
+
+    // Move to next player
+    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+  }
+
+  // Start game button handler
+  startGameBtn.addEventListener('click', () => {
+    const playerInputs = playerNamesContainer.querySelectorAll('input');
+    players = [];
+    Game.players = [];
+
+    // Validate player names
+    let isValid = true;
+    playerInputs.forEach((input, index) => {
+      if (!input.value.trim()) {
+        isValid = false;
+        input.classList.add('error');
+      } else {
+        input.classList.remove('error');
+        
+        // Create player object
+        const player = {
+          name: input.value.trim(),
+          color: playerTokenColors[index],
+          symbol: playerTokenSymbols[index],
+          position: 0,
+          money: 1500,
+          lastRoll: null
+        };
+
+        players.push(player);
+        Game.players.push(player);
+
+        // Place player on GO space
+        placePlayerOnSpace(player, 0);
+      }
+    });
+
+    if (isValid) {
+      // Close the modal
+      gameSetupModal.style.display = 'none';
+
+      // Update players list in game status panel
+      updatePlayerStatusDisplay();
+
+      // Enable dice roll button
+      rollDiceBtn.disabled = false;
+    }
+  });
+
+  // Event listeners
+  numPlayersSelect.addEventListener('change', generatePlayerInputs);
+  rollDiceBtn.addEventListener('click', rollDice);
+
+  // Generate initial player inputs
+  generatePlayerInputs();
+
+  // Initially disable dice roll button
+  rollDiceBtn.disabled = true;
+  
+});
+  </script>
+</body>
+</html>

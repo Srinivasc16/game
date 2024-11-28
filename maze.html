@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constitution Quiz Maze Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 10;
+        }
+
+        #status {
+            margin-bottom: 10px;
+        }
+
+        #quiz-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: rgba(255,255,255,0.8);
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .modal-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-option {
+            padding: 10px;
+            border: 1px solid black;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .modal-option:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Constitution Maze</h1>
+        <div id="status">
+            <p>Score: <span id="score">0</span></p>
+            <p id="progress">Use arrow keys to navigate through the maze!</p>
+        </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal">
+        <div class="modal-content">
+            <h2 id="quiz-question">Question goes here</h2>
+            <div id="quiz-options" class="modal-options">
+                <!-- Options will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Maze structure (2: Start, 3: Goal, 1: Wall, 0: Path, 4: Coin)
+        const mazeStructure = [
+            [2, 0, 1, 1, 1, 1, 1],
+            [1, 0, 4, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 0, 1],
+            [1, 0, 4, 0, 0, 4, 1],
+            [1, 0, 1, 1, 1, 1, 1],
+            [1, 0, 0, 4, 0, 0, 3],
+            [1, 1, 1, 1, 1, 1, 1]
+        ];
+
+        const constitutionQuestions = [
+    {
+        question: "Who is considered the Father of the Indian Constitution?",
+        options: ["Mahatma Gandhi", "Dr. B.R. Ambedkar", "Jawaharlal Nehru", "Sardar Patel"],
+        correctAnswers: ["Dr. B.R. Ambedkar", "2"]
+    },
+    {
+        question: "In which year was the Constitution of India adopted?",
+        options: ["1947", "1950", "1952", "1948"],
+        correctAnswers: ["1950", "2"]
+    },
+    {
+        question: "How many original articles were in the Constitution of India when it was first adopted?",
+        options: ["395", "250", "410", "300"],
+        correctAnswers: ["395", "1"]
+    },
+    {
+        question: "Which part of the Indian Constitution is known as the 'Conscience of the Constitution'?",
+        options: ["Fundamental Rights", "Directive Principles", "Fundamental Duties", "Preamble"],
+        correctAnswers: ["Fundamental Rights", "1"]
+    },
+    {
+        question: "Who was the President of the Constituent Assembly?",
+        options: ["Jawaharlal Nehru", "Dr. Rajendra Prasad", "B.R. Ambedkar", "Sardar Patel"],
+        correctAnswers: ["Dr. Rajendra Prasad", "2"]
+    },
+    {
+        question: "How many times has the Indian Constitution been amended as of 2024?",
+        options: ["105", "126", "145", "100"],
+        correctAnswers: ["105", "3"]
+    },
+    {
+        question: "Which fundamental right was added by the 42nd Amendment in 1976?",
+        options: ["Right to Education", "Right to Property", "Right to Information", "Right to Equality"],
+        correctAnswers: ["Right to Information", "3"]
+    },
+    {
+        question: "What is the minimum age to become the President of India?",
+        options: ["25 years", "30 years", "35 years", "40 years"],
+        correctAnswers: ["35 years", "3"]
+    },
+    {
+        question: "Which article of the Constitution deals with the directive principles of state policy?",
+        options: ["Article 32", "Article 42", "Article 36-51", "Article 21"],
+        correctAnswers: ["Article 36-51", "3"]
+    },
+    {
+        question: "Who has the power to declare a national emergency in India?",
+        options: ["Prime Minister", "President", "Chief Justice", "Parliament"],
+        correctAnswers: ["President", "2"]
+    },
+    {
+        question: "What is the official language of the Indian Constitution?",
+        options: ["Hindi", "English", "Hindi and English", "Sanskrit"],
+        correctAnswers: ["Hindi and English", "3"]
+    },
+    {
+        question: "How many schedules were originally in the Indian Constitution?",
+        options: ["8", "10", "12", "7"],
+        correctAnswers: ["8", "1"]
+    },
+    {
+        question: "Which article provides for the protection of life and personal liberty?",
+        options: ["Article 14", "Article 19", "Article 21", "Article 32"],
+        correctAnswers: ["Article 21", "3"]
+    },
+    {
+        question: "Who is considered the chief guardian of the Constitution?",
+        options: ["Prime Minister", "President", "Chief Justice of India", "Speaker of Lok Sabha"],
+        correctAnswers: ["Chief Justice of India", "3"]
+    },
+    {
+        question: "What type of republic is India defined as in the Constitution?",
+        options: ["Federal", "Unitary", "Quasi-federal", "Confederate"],
+        correctAnswers: ["Quasi-federal", "3"]
+    }
+];
+
+        // Game state
+        let currentPosition = { x: 0, z: 0 };
+        let score = 0;
+
+        // Three.js setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Lighting
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(3.5, 5, 3.5);
+        scene.add(light);
+
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+
+        // Materials
+        const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xADD8E6  });
+        const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x998970 });
+        const goalMaterial = new THREE.MeshStandardMaterial({ color: 0xff4444 });
+        const playerMaterial = new THREE.MeshStandardMaterial({ color: 0x4169E1});
+        const coinMaterial = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xffaa00 });
+
+        // Array to store coin objects
+        const coins = [];
+
+        // Create maze
+        function createMaze() {
+            const cellSize = 1;
+            const wallHeight = 1;
+            const mazeWidth = mazeStructure[0].length;
+            const mazeHeight = mazeStructure.length;
+
+            mazeStructure.forEach((row, z) => {
+                row.forEach((cell, x) => {
+                    const position = { x: x * cellSize, y: 0, z: z * cellSize };
+                    if (cell === 1) {
+                        // Wall
+                        const wall = new THREE.Mesh(
+                            new THREE.BoxGeometry(cellSize, wallHeight, cellSize),
+                            wallMaterial
+                        );
+                        wall.position.set(position.x, wallHeight / 2, position.z);
+                        scene.add(wall);
+                    } else if (cell === 3) {
+                        // Goal
+                        const goal = new THREE.Mesh(
+                            new THREE.BoxGeometry(cellSize, wallHeight, cellSize),
+                            goalMaterial
+                        );
+                        goal.position.set(position.x, wallHeight / 2, position.z);
+                        scene.add(goal);
+                    } else if (cell === 4) {
+                        // Coin
+                        const coin = new THREE.Mesh(
+                            new THREE.CylinderGeometry(0.2, 0.2, 0.1, 32),
+                            coinMaterial
+                        );
+                        coin.position.set(position.x, 0.1, position.z);
+                        coin.rotation.x = Math.PI / 2;
+                        coins.push({ x, z, mesh: coin });
+                        scene.add(coin);
+                    } else if (cell === 2) {
+                        // Start position
+                        currentPosition = { x, z };
+                    }
+                });
+            });
+
+            // Updated floor creation to precisely cover the maze
+            const floor = new THREE.Mesh(
+                new THREE.PlaneGeometry(mazeWidth, mazeHeight),
+                floorMaterial
+            );
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.set(
+                (mazeWidth - 1) / 2, 
+                -0.5, 
+                (mazeHeight - 1) / 2
+            );
+            scene.add(floor);
+        }
+
+        // Player setup
+        let player;
+        function createPlayer() {
+            const geometry = new THREE.SphereGeometry(0.3, 16, 16);
+            player = new THREE.Mesh(geometry, playerMaterial);
+            player.position.set(currentPosition.x + 0.5, 0.3, currentPosition.z + 0.5);
+            scene.add(player);
+        }
+
+        let currentQuizQuestion = null;
+        let currentCoinIndex = null;
+
+        function showQuizModal(questionObj, coinIndex) {
+            currentQuizQuestion = questionObj;
+            currentCoinIndex = coinIndex;
+
+            // Set question text
+            document.getElementById('quiz-question').textContent = questionObj.question;
+
+            // Clear previous options
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+
+            // Create option buttons
+            questionObj.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'modal-option';
+                optionElement.textContent = option;
+                optionElement.setAttribute('data-index', index + 1);
+                optionElement.onclick = () => checkAnswer(option, index + 1);
+                optionsContainer.appendChild(optionElement);
+            });
+
+            // Show modal
+            document.getElementById('quiz-modal').style.display = 'block';
+        }
+
+        function checkAnswer(selectedOption, selectedIndex) {
+            // Close modal
+            document.getElementById('quiz-modal').style.display = 'none';
+
+            // Check if answer is correct
+            const isCorrectAnswer = currentQuizQuestion.correctAnswers.includes(selectedOption) || 
+                                    currentQuizQuestion.correctAnswers.includes(selectedIndex.toString());
+
+            if (isCorrectAnswer) {
+                // Correct answer - collect coin
+                scene.remove(coins[currentCoinIndex].mesh);
+                coins.splice(currentCoinIndex, 1);
+                score += 10;
+                document.getElementById('score').textContent = score;
+                document.getElementById('progress').textContent = "Correct! Coin collected!";
+            } else {
+                // Incorrect answer
+                document.getElementById('progress').textContent = "Incorrect! Study the Constitution more!";
+                alert(`Wrong answer! The correct answer(s) were: ${currentQuizQuestion.correctAnswers.join(', ')}`);
+            }
+
+            // Reset quiz state
+            currentQuizQuestion = null;
+            currentCoinIndex = null;
+        }
+
+        // Handle coin collection
+        function handleCoinCollision() {
+            const coinIndex = coins.findIndex(
+                coin => coin.x === currentPosition.x && coin.z === currentPosition.z
+            );
+            
+            if (coinIndex !== -1) {
+                // Select a random question
+                const questionObj = constitutionQuestions[Math.floor(Math.random() * constitutionQuestions.length)];
+                
+                // Show quiz modal
+                showQuizModal(questionObj, coinIndex);
+            }
+        }
+
+        // Player movement
+        function movePlayer(direction) {
+            const moves = {
+                forward: { dx: 0, dz: -1 },
+                backward: { dx: 0, dz: 1 },
+                left: { dx: -1, dz: 0 },
+                right: { dx: 1, dz: 0 }
+            };
+
+            const move = moves[direction];
+            const newX = currentPosition.x + move.dx;
+            const newZ = currentPosition.z + move.dz;
+
+            // Check bounds and collisions
+            if (
+                newZ >= 0 && newZ < mazeStructure.length &&
+                newX >= 0 && newX < mazeStructure[0].length &&
+                mazeStructure[newZ][newX] !== 1
+            ) {
+                currentPosition.x = newX;
+                currentPosition.z = newZ;
+                player.position.set(currentPosition.x + 0.5, 0.3, currentPosition.z + 0.5);
+                handleCoinCollision();
+
+                if (mazeStructure[newZ][newX] === 3) {
+                    document.getElementById('progress').textContent = "Congratulations! You reached the goal!";
+                }
+            }
+        }
+
+        // Event listener for movement
+        window.addEventListener('keydown', (event) => {
+            switch (event.key) {
+                case 'ArrowUp': movePlayer('forward'); break;
+                case 'ArrowDown': movePlayer('backward'); break;
+                case 'ArrowLeft': movePlayer('left'); break;
+                case 'ArrowRight': movePlayer('right'); break;
+            }
+        });
+
+        // Create maze and player
+        createMaze();
+        createPlayer();
+
+        // Camera setup for full view
+        camera.position.set(mazeStructure[0].length / 2, 10, mazeStructure.length / 2);
+        camera.lookAt(mazeStructure[0].length / 2, 0, mazeStructure.length / 2);
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>

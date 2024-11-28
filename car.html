@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Car Runner</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            perspective: 1000px;
+            background: linear-gradient(#1a1a2e, #16213e);
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            height: 100vh;
+            transform-style: preserve-3d;
+        }
+
+        #road {
+            position: absolute;
+            width: 1000px;
+            height: 100vh;
+            background: linear-gradient(90deg, #333 0%, #444 50%, #333 100%);
+            left: 50%;
+            transform: translateX(-50%) rotateX(60deg);
+            transform-origin: center bottom;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        #player {
+            position: absolute;
+            width: 60px;
+            height: 100px;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: left 0.2s;
+            z-index: 1000;
+        }
+
+        .car-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Car Design */
+        .car-top {
+            position: absolute;
+            width: 70%;
+            height: 40%;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            top: 10%;
+            left: 15%;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .car-bottom {
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            bottom: 0;
+            border-radius: 10px;
+        }
+
+        .window {
+            position: absolute;
+            width: 60%;
+            height: 50%;
+            background: #2c3e50;
+            top: 20%;
+            left: 20%;
+            border-radius: 5px;
+        }
+
+        .wheel {
+            position: absolute;
+            width: 20px;
+            height: 40px;
+            background: #2c3e50;
+            bottom: -5px;
+            border-radius: 10px;
+        }
+
+        .wheel-left {
+            left: 5px;
+        }
+
+        .wheel-right {
+            right: 5px;
+        }
+
+        .headlight {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #f1c40f;
+            bottom: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #f1c40f;
+        }
+
+        .headlight-left {
+            left: 5px;
+        }
+
+        .headlight-right {
+            right: 5px;
+        }
+
+        .obstacle {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #2ed573, #7bed9f);
+            transform: translateX(-50%) rotateX(-60deg);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(46, 213, 115, 0.5);
+        }
+
+        #score, #speed-boost {
+            position: fixed;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        #score {
+            top: 20px;
+            right: 20px;
+        }
+
+        #speed-boost {
+            top: 20px;
+            left: 20px;
+        }
+
+        /* Game Over Modal */
+        #game-over-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            z-index: 2000;
+            min-width: 300px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .score-display {
+            margin: 20px 0;
+            font-size: 24px;
+            color: #f1c40f;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .game-button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .new-game-btn {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .continue-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .game-button:hover {
+            transform: scale(1.1);
+        }
+
+        /* Start Screen */
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 2000;
+        }
+
+        .start-btn {
+            padding: 20px 40px;
+            font-size: 24px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.1);
+        }
+        @keyframes coinCollect {
+    0% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(2) translateY(-50px);
+        opacity: 0;
+    }
+}
+
+.coin-collect-text {
+    position: absolute;
+    color: gold;
+    font-weight: bold;
+    font-size: 20px;
+    pointer-events: none;
+    animation: floatUp 1s ease-out;
+    z-index: 1000;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+}
+
+.coin {
+    /* ... existing coin styles ... */
+    animation: coinRotate 1s infinite linear;
+}
+.coin {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(#ffd700, #ffa500);
+    border-radius: 50%;
+    transform: translateX(-50%) rotateX(-60deg);
+    box-shadow: 0 0 15px gold;
+}
+
+.obstacle-basic {
+    box-shadow: 0 0 20px rgba(46, 213, 115, 0.5);
+}
+
+.obstacle-large {
+    box-shadow: 0 0 25px rgba(255, 71, 87, 0.6);
+}
+
+.obstacle-moving {
+    box-shadow: 0 0 15px rgba(0, 115, 191, 0.5);
+}
+
+.coin-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(#ffd700, #ffa500);
+    border-radius: 50%;
+    box-shadow: 0 0 5px gold;
+}
+
+@keyframes coinRotate {
+    0% { transform: translateX(-50%) rotateX(-60deg) rotateY(0deg); }
+    100% { transform: translateX(-50%) rotateX(-60deg) rotateY(360deg); }
+}
+
+        #coin-count {
+            position: fixed;
+            top: 20px;
+            left: 180px;
+            background: rgba(0,0,0,0.7);
+            color: gold;
+            padding: 10px 20px;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+        #nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            z-index: 2000;
+            color: white;
+        }
+
+        #nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-button {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .nav-button:hover {
+            transform: scale(1.1);
+        }
+
+        #instructions-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            z-index: 3000;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        #instructions-modal h2 {
+            margin-bottom: 20px;
+        }
+
+        #instructions-modal p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .close-instructions {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="start-screen">
+        <h1>3D Car Runner</h1>
+        <p>Use ← and → arrows to move</p>
+        <button class="start-btn" onclick="startGame()">Start Game</button>
+    </div>
+    <div id="game-container">
+        <div id="road"></div>
+        <div id="player">
+            <div class="car-body">
+                <div class="car-top">
+                    <div class="window"></div>
+                </div>
+                <div class="car-bottom">
+                    <div class="wheel wheel-left"></div>
+                    <div class="wheel wheel-right"></div>
+                    <div class="headlight headlight-left"></div>
+                    <div class="headlight headlight-right"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="score">Score: 0</div>
+    <div id="instructions-modal">
+        <h2>Game Instructions</h2>
+        <p>Welcome to 3D Car Runner! Here's how to play:</p>
+        
+        <p><strong>Basic Controls:</strong>
+        • Use Left (←) and Right (→) arrow keys to move your car
+        • Dodge obstacles and collect coins
+        • Survive as long as possible to score points</p>
+        
+        <p><strong>Obstacles:</strong>
+        • Green obstacles: Basic obstacles (10 points)
+        • Red obstacles: Large obstacles (20 points)
+        • Blue obstacles: Moving obstacles (30 points)
+        • Avoid these to prevent game over!</p>
+        
+        <p><strong>Coins and Power-ups:</strong>
+        • Collect golden coins to increase your coin count
+        • Use coins to continue after game over
+        • Look out for purple power-up orbs</p>
+        
+        <p><strong>Game Over Mechanics:</strong>
+        • When you crash, you'll be given a quiz to continue
+        • Answer correctly to restart the game
+        • You have limited continues</p>
+        
+        <p><strong>Scoring:</strong>
+        • Points increase over time
+        • Dodging obstacles gives bonus points
+        • Game speed increases as you progress</p>
+        
+        <button class="close-instructions" onclick="closeInstructions()">Close</button>
+    </div>
+    <div id="speed-boost">Speed Boost: 0</div>
+<div id="coin-count">Coins: 0</div>
+    <div id="game-over-modal">
+        <h2>Game Over!</h2>
+        <div class="score-display">
+            <p>Current Score: <span id="final-score">0</span></p>
+            <p>High Score: <span id="high-score">0</span></p>
+        </div>
+        <div class="button-container">
+            <button class="game-button new-game-btn" onclick="startNewGame()">New Game</button>
+            <button class="game-button continue-btn" onclick="continueGame()">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+const player = document.getElementById('player');
+const gameContainer = document.getElementById('game-container');
+const scoreElement = document.getElementById('score');
+const speedBoostElement = document.getElementById('speed-boost');
+const gameOverModal = document.getElementById('game-over-modal');
+const coinCountElement = document.getElementById('coin-count');
+
+let score = 0;
+let isGameOver = false;
+let playerPosition = 'center';
+let gameSpeed = 5;
+let speedBoost = 0;
+let lives = 3;
+let highScore = localStorage.getItem('highScore') || 0;
+let coinCount = 0;
+let laneMarkersInterval = null;
+let obstacleInterval = null;
+let canContinue = true;
+function showInstructions() {
+            document.getElementById('instructions-modal').style.display = 'block';
+        }
+
+        function closeInstructions() {
+            document.getElementById('instructions-modal').style.display = 'none';
+        }
+
+        function toggleSound() {
+            const soundButton = document.querySelector('.nav-button:nth-child(2)');
+            // Placeholder for sound toggle logic
+            if (soundButton.textContent === 'Sound: On') {
+                soundButton.textContent = 'Sound: Off';
+                // Add sound off logic
+            } else {
+                soundButton.textContent = 'Sound: On';
+                // Add sound on logic
+            }
+        }
+// Constitution Quiz Questions
+const constitutionQuestions = [
+    {
+        question: "Who is known as the Father of the Indian Constitution?",
+        answer: "dr br ambedkar",
+        options: ["dr br ambedkar", "mahatma gandhi", "jawaharlal nehru", "sardar patel"]
+    },
+    {
+        question: "When was the Indian Constitution adopted?",
+        answer: "26 november 1949",
+        options: ["15 august 1947", "26 january 1950", "26 november 1949", "2 october 1948"]
+    },
+    {
+        question: "How many articles were there in the original Indian Constitution?",
+        answer: "395",
+        options: ["395", "448", "250", "500"]
+    },
+    {
+        question: "Which is the longest written constitution in the world?",
+        answer: "indian constitution",
+        options: ["us constitution", "indian constitution", "british constitution", "russian constitution"]
+    }
+];
+
+// Add quiz modal to body
+document.body.insertAdjacentHTML('beforeend', `
+    <div id="quiz-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+         background: rgba(0, 0, 0, 0.95); padding: 30px; border-radius: 20px; color: white; text-align: center; 
+         z-index: 3000; min-width: 300px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+        <h2>Answer to Continue</h2>
+        <p id="quiz-question" style="margin: 20px 0; font-size: 18px;"></p>
+        <div id="options-container" style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;"></div>
+    </div>
+`);
+
+// Add lane marker style
+const style = document.createElement('style');
+style.textContent = `
+    .lane-marker {
+        position: absolute;
+        width: 10px;
+        height: 80px;
+        background: white;
+        left: 50%;
+        transform: translateX(-50%) rotateX(60deg);
+        opacity: 0.5;
+    }
+`;
+document.head.appendChild(style);
+
+// Game Functions
+function startGame() {
+    document.getElementById('start-screen').style.display = 'none';
+    resetGame();
+    startGameElements();
+}
+
+function resetGame() {
+    score = 0;
+    isGameOver = false;
+    gameSpeed = 5;
+    speedBoost = 0;
+    coinCount = 0;
+    clearGameElements();
+}
+
+function startGameElements() {
+    createLaneMarkers();
+    startObstacleCreation();
+    increaseSpeed();
+    gameLoop();
+}
+
+function startObstacleCreation() {
+    // Clear any existing obstacle interval
+    if (obstacleInterval) {
+        clearInterval(obstacleInterval);
+    }
+    
+    // Create initial obstacle
+    createObstacle();
+    
+    // Set up new obstacle interval
+    obstacleInterval = setInterval(() => {
+        if (!isGameOver) {
+            createObstacle();
+        }
+    }, 2000);
+}
+
+function clearGameElements() {
+    if (laneMarkersInterval) {
+        clearInterval(laneMarkersInterval);
+        laneMarkersInterval = null;
+    }
+    if (obstacleInterval) {
+        clearInterval(obstacleInterval);
+        obstacleInterval = null;
+    }
+    
+    document.querySelectorAll('.lane-marker, .obstacle, .coin').forEach(el => el.remove());
+}
+
+function createLaneMarkers() {
+    if (laneMarkersInterval) clearInterval(laneMarkersInterval);
+    
+    laneMarkersInterval = setInterval(() => {
+        if (isGameOver) return;
+
+        const marker = document.createElement('div');
+        marker.className = 'lane-marker';
+        marker.style.top = '-80px';
+        gameContainer.appendChild(marker);
+
+        let pos = -80;
+        const moveMarker = setInterval(() => {
+            if (isGameOver) {
+                clearInterval(moveMarker);
+                return;
+            }
+
+            pos += gameSpeed + speedBoost;
+            marker.style.top = pos + 'px';
+
+            if (pos > window.innerHeight) {
+                clearInterval(moveMarker);
+                marker.remove();
+            }
+        }, 16);
+    }, 300);
+}
+
+const obstacleTypes = [
+    {
+        class: 'obstacle-basic',
+        color: '#2ed573',
+        points: 10,
+        size: { width: 50, height: 50 }
+    },
+    {
+        class: 'obstacle-large',
+        color: '#ff4757',
+        points: 20,
+        size: { width: 80, height: 80 }
+    },
+    {
+        class: 'obstacle-moving',
+        color: '#89CFF0',
+        points: 30,
+        size: { width: 40, height: 40 }
+    }
+];
+
+function createObstacle() {
+    if (isGameOver) return;
+
+    const random = Math.random();
+    let element;
+
+    if (random < 0.3) { // 30% chance for coin
+        element = createCoin();
+    } else if (random < 0.35) { // 5% chance for power-up
+        element = createPowerUp();
+        if (!element) {
+            element = createRandomObstacle();
+        }
+    } else {
+        element = createRandomObstacle();
+    }
+
+    if (element) {
+        gameContainer.appendChild(element);
+        animateElement(element);
+    }
+}
+function createRandomObstacle() {
+    const obstacleType = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+    const obstacle = document.createElement('div');
+    
+    obstacle.className = `obstacle ${obstacleType.class}`;
+    obstacle.style.width = obstacleType.size.width + 'px';
+    obstacle.style.height = obstacleType.size.height + 'px';
+    obstacle.style.background = `linear-gradient(45deg, ${obstacleType.color}, ${adjustColor(obstacleType.color, 20)})`;
+    obstacle.dataset.points = obstacleType.points;
+
+    return obstacle;
+}
+
+function createCoin() {
+    const coin = document.createElement('div');
+    coin.className = 'coin';
+    return coin;
+}
+
+function animateElement(element) {
+    let pos = -50;
+    let horizontalOffset = 0;
+    const isMoving = element.classList.contains('obstacle-moving');
+    const startingLeft = Math.random() < 0.5 ? '35%' : '65%';
+    element.style.left = startingLeft;
+
+    const moveElement = setInterval(() => {
+        if (isGameOver) {
+            clearInterval(moveElement);
+            return;
+        }
+
+        pos += gameSpeed + speedBoost;
+        
+        if (isMoving) {
+            horizontalOffset = Math.sin(pos * 0.05) * 50;
+            element.style.transform = `translateX(${horizontalOffset}px) translateX(-50%) rotateX(-60deg)`;
+        }
+
+        element.style.top = pos + 'px';
+
+        // Collision detection
+        if (pos > window.innerHeight - 160 && pos < window.innerHeight - 40) {
+            const playerRect = player.getBoundingClientRect();
+            const elementRect = element.getBoundingClientRect();
+            
+            const horizontalDistance = Math.abs(
+                (playerRect.left + playerRect.width/2) - 
+                (elementRect.left + elementRect.width/2)
+            );
+
+            if (horizontalDistance < 50) {
+                if (element.classList.contains('coin')) {
+                    collectCoin(element);
+                    clearInterval(moveElement);
+                    element.remove();
+                } else {
+                    handleCollision();
+                    clearInterval(moveElement);
+                    element.remove();
+                }
+            }
+        }
+
+        if (pos > window.innerHeight) {
+            clearInterval(moveElement);
+            element.remove();
+            if (element.classList.contains('obstacle')) {
+                score += parseInt(element.dataset.points || 10);
+                scoreElement.textContent = `Score: ${score}`;
+            }
+        }
+    }, 16);
+}
+
+function collectCoin(coin) {
+    coinCount++;
+    coinCountElement.textContent = `Coins: ${coinCount}`;
+    
+    // Create floating text
+    const floatingText = document.createElement('div');
+    floatingText.className = 'coin-collect-text';
+    floatingText.textContent = '+1';
+    floatingText.style.left = coin.style.left;
+    floatingText.style.top = coin.style.top;
+    gameContainer.appendChild(floatingText);
+
+    // Create particle effect
+    for (let i = 0; i < 8; i++) {
+        createCoinParticle(coin);
+    }
+
+    setTimeout(() => floatingText.remove(), 1000);
+}
+
+function createCoinParticle(coin) {
+    const particle = document.createElement('div');
+    particle.className = 'coin-particle';
+    
+    const coinRect = coin.getBoundingClientRect();
+    const startX = coinRect.left + coinRect.width/2;
+    const startY = coinRect.top + coinRect.height/2;
+
+    particle.style.left = startX + 'px';
+    particle.style.top = startY + 'px';
+
+    const angle = Math.random() * Math.PI * 2;
+    const velocity = 3 + Math.random() * 5;
+    const vx = Math.cos(angle) * velocity;
+    const vy = Math.sin(angle) * velocity;
+
+    gameContainer.appendChild(particle);
+
+    let time = 0;
+    const animate = () => {
+        time += 0.1;
+        const x = startX + vx * time;
+        const y = startY + vy * time + 2 * time * time;
+        const scale = 1 - time/2;
+        
+        particle.style.transform = `translate(${x - startX}px, ${y - startY}px) scale(${scale})`;
+        particle.style.opacity = 1 - time/2;
+
+        if (time < 2) {
+            requestAnimationFrame(animate);
+        } else {
+            particle.remove();
+        }
+    };
+
+    requestAnimationFrame(animate);
+}
+function adjustColor(color, amount) {
+    return '#' + color.replace(/^#/, '').replace(/../g, color => 
+        ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2)
+    );
+}
+function createPowerUp() {
+    if (Math.random() < 0.1) { // 10% chance to spawn power-up
+        const powerUp = document.createElement('div');
+        powerUp.className = 'power-up';
+        powerUp.style.cssText = `
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(#9b59b6, #8e44ad);
+            border-radius: 50%;
+            transform: translateX(-50%) rotateX(-60deg);
+            box-shadow: 0 0 20px #9b59b6;
+        `;
+        powerUp.dataset.type = Math.random() < 0.5 ? 'shield' : 'speed';
+        return powerUp;
+    }
+    return null;
+}
+function increaseSpeed() {
+    setInterval(() => {
+        if (!isGameOver && gameSpeed < 15) {
+            gameSpeed += 0.5;
+            speedBoostElement.textContent = `Speed: ${Math.floor(gameSpeed)}`;
+        }
+    }, 5000);
+}
+
+function handleCollision() {
+    isGameOver = true;
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('highScore', highScore);
+    }
+    showGameOverModal();
+}
+
+function showGameOverModal() {
+    document.getElementById('final-score').textContent = score;
+    document.getElementById('high-score').textContent = highScore;
+    gameOverModal.style.display = 'block';
+}
+
+function startNewGame() {
+    canContinue = true;
+    location.reload();
+}
+
+function continueGame() {
+    if (!canContinue) {
+        if (coinCount >= 5) {
+            const confirmContinue = confirm(`Use 5 coins to continue? (Current coins: ${coinCount})`);
+            if (confirmContinue) {
+                coinCount -= 5;
+                coinCountElement.textContent = `Coins: ${coinCount}`;
+                showQuiz();
+            } else {
+                startNewGame();
+            }
+        } else {
+            alert('Not enough coins to continue! Need at least 5 coins.');
+            startNewGame();
+        }
+        return;
+    }
+
+    if (lives > 0) {
+        showQuiz();
+    } else {
+        alert('No more continues left!');
+        startNewGame();
+    }
+}
+
+function showQuiz() {
+    const quizModal = document.getElementById('quiz-modal');
+    const questionElement = document.getElementById('quiz-question');
+    const optionsContainer = document.getElementById('options-container');
+    
+    gameOverModal.style.display = 'none';
+    quizModal.style.display = 'block';
+    
+    const randomQuestion = constitutionQuestions[Math.floor(Math.random() * constitutionQuestions.length)];
+    questionElement.textContent = randomQuestion.question;
+    
+    optionsContainer.innerHTML = '';
+    randomQuestion.options.forEach(option => {
+        const button = document.createElement('button');
+        button.textContent = option;
+        button.style.cssText = `
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 15px;
+            background: #2ecc71;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        `;
+        
+        button.addEventListener('click', () => checkAnswer(option.toLowerCase(), randomQuestion.answer));
+        optionsContainer.appendChild(button);
+    });
+}
+
+function checkAnswer(userAnswer, correctAnswer) {
+    const quizModal = document.getElementById('quiz-modal');
+    
+    if (userAnswer === correctAnswer) {
+        quizModal.style.display = 'none';
+        lives--;
+        isGameOver = false;
+        canContinue = false;
+        clearGameElements();
+        createLaneMarkers();
+        startObstacleCreation(); // Add this line to restart obstacle creation
+        gameLoop();
+    } else {
+        alert('Wrong answer! Game Over!');
+        quizModal.style.display = 'none';
+        startNewGame();
+    }
+}
+
+function gameLoop() {
+    if (!isGameOver) {
+        score += 1;
+        scoreElement.textContent = `Score: ${score}`;
+        requestAnimationFrame(gameLoop);
+    }
+}
+
+// Player Movement
+document.addEventListener('keydown', (e) => {
+    if (isGameOver) return;
+
+    const carBody = player.querySelector('.car-body');
+    
+    if (e.key === 'ArrowLeft' && playerPosition !== 'left') {
+        player.style.left = '35%';
+        playerPosition = 'left';
+        carBody.style.transform = 'rotate(-15deg)';
+    }
+    if (e.key === 'ArrowRight' && playerPosition !== 'right') {
+        player.style.left = '65%';
+        playerPosition = 'right';
+        carBody.style.transform = 'rotate(15deg)';
+    }
+    
+    setTimeout(() => {
+        carBody.style.transform = 'rotate(0deg)';
+    }, 200);
+});
+    </script>
+</body>
+</html>

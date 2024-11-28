@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Constitution Quiz Shooting Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-image: url(bac.webp);
+            background-size: cover;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #score-board {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        #high-score-board {
+            position: absolute;
+            top: 20px;
+            left: 250px;
+            color: white;
+            font-size: 24px;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        #lives-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+        }
+
+        .life-emblem {
+            width: 70px;
+            height: 70px;
+            background-image: url(emblem.png);
+            background-size: cover;
+            margin-left: 10px;
+        }
+
+        .boards {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            gap: 50px;
+            margin-top: 100px;
+        }
+
+        .target-board {
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background-image: url(shoot.webp);
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+
+        .target-board:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+
+        #bottom-gun-container {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #bottom-gun-image {
+            width: 250px;
+            height: 150px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="%23555"><rect x="0" y="40" width="150" height="20" rx="10"/><rect x="150" y="30" width="50" height="40" rx="10"/></svg>');
+            background-size: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+
+        #bottom-gun-image:hover {
+            transform: scale(1.1);
+        }
+
+        #question-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            z-index: 100;
+            display: none;
+        }
+
+        .question-button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .question-button:hover {
+            background-color: #2980b9;
+        }
+
+        #muzzle-flash {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,255,0,0.7) 0%, rgba(255,255,0,0) 70%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        #game-over-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0,0,0,0.6);
+            z-index: 200;
+            display: none;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        #game-over-modal h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        #game-over-modal p {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        #restart-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="score-board">Score: <span id="score">0</span></div>
+        <div id="high-score-board">High Score: <span id="high-score">0</span></div>
+        
+        <div id="lives-container">
+            <div id="life-1" class="life-emblem"></div>
+            <div id="life-2" class="life-emblem"></div>
+            <div id="life-3" class="life-emblem"></div>
+        </div>
+        
+        <div class="boards">
+            <div id="target-board-1" class="target-board"></div>
+            <div id="target-board-2" class="target-board"></div>
+            <div id="target-board-3" class="target-board"></div>
+        </div>
+        
+        <div id="bottom-gun-container">
+            <div id="bottom-gun-image"></div>
+        </div>
+
+        <div id="question-modal">
+            <h2 id="question-text"></h2>
+            <div id="options-container"></div>
+        </div>
+
+        <div id="game-over-modal">
+            <h2>Game Over</h2>
+            <p>Your Final Score: <span id="final-score"></span></p>
+            <p>High Score: <span id="modal-high-score"></span></p>
+            <button id="restart-button">Restart Game</button>
+        </div>
+
+        <div id="muzzle-flash"></div>
+    </div>
+
+    <script>
+        // Constitution Questions
+        const constitutionQuestions = [
+            {
+                question: "Who is the Father of the Indian Constitution?",
+                options: ["B.R. Ambedkar", "Jawaharlal Nehru", "Mahatma Gandhi", "Sardar Patel"],
+                correctAnswer: "B.R. Ambedkar"
+            },
+            {
+                question: "When was the Constitution of India adopted?",
+                options: ["26 January 1950", "15 August 1947", "26 November 1949", "2 October 1948"],
+                correctAnswer: "26 November 1949"
+            },
+            {
+                question: "How many fundamental rights are in the Indian Constitution?",
+                options: ["5", "6", "7", "8"],
+                correctAnswer: "7"
+            },
+            {
+                question: "Who was the first President of India?",
+                options: ["Rajendra Prasad", "Sarvepalli Radhakrishnan", "Zakir Husain", "V.V. Giri"],
+                correctAnswer: "Rajendra Prasad"
+            },
+            {
+                question: "What is the minimum voting age in India?",
+                options: ["16 years", "18 years", "21 years", "25 years"],
+                correctAnswer: "18 years"
+            }
+        ];
+
+        let score = 0;
+        let highScore = 0;
+        let currentQuestion = null;
+        let lives = 3;
+        let questionSource = null;
+
+        // Load high score from local storage
+        if (localStorage.getItem('constitutionQuizHighScore')) {
+            highScore = parseInt(localStorage.getItem('constitutionQuizHighScore'));
+            document.getElementById('high-score').textContent = highScore;
+        }
+
+        // Show Question Modal
+        function showQuestion(source) {
+            const questionModal = document.getElementById('question-modal');
+            const questionText = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('options-container');
+
+            // Track which element triggered the question
+            questionSource = source;
+
+            // Select random question
+            currentQuestion = constitutionQuestions[Math.floor(Math.random() * constitutionQuestions.length)];
+
+            // Set question text
+            questionText.textContent = currentQuestion.question;
+
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+
+            // Create option buttons
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('question-button');
+                button.onclick = () => checkAnswer(option);
+                optionsContainer.appendChild(button);
+            });
+
+            // Show modal
+            questionModal.style.display = 'block';
+        }
+
+        // Check Answer
+        function checkAnswer(selectedOption) {
+            const questionModal = document.getElementById('question-modal');
+            const scoreElement = document.getElementById('score');
+            const highScoreElement = document.getElementById('high-score');
+            const muzzleFlash = document.getElementById('muzzle-flash');
+
+            if (selectedOption === currentQuestion.correctAnswer) {
+                score += 10;
+                scoreElement.textContent = score;
+                
+                // Update high score if needed
+                if (score > highScore) {
+                    highScore = score;
+                    highScoreElement.textContent = highScore;
+                    localStorage.setItem('constitutionQuizHighScore', highScore);
+                }
+                
+                // Muzzle flash effect
+                muzzleFlash.style.opacity = '1';
+                setTimeout(() => {
+                    muzzleFlash.style.opacity = '0';
+                }, 200);
+            } else {
+                // Reduce score
+                score = Math.max(0, score - 5);
+                scoreElement.textContent = score;
+
+                // Remove life
+                lives--;
+                document.getElementById(`life-${lives + 1}`).style.display = 'none';
+
+                // Check if game is over
+                if (lives === 0) {
+                    endGame();
+                    return;
+                }
+
+                alert('Wrong answer! Try again.');
+            }
+
+            // Hide modal
+            questionModal.style.display = 'none';
+        }
+
+        // End Game
+        function endGame() {
+            const gameOverModal = document.getElementById('game-over-modal');
+            const finalScoreElement = document.getElementById('final-score');
+            const modalHighScoreElement = document.getElementById('modal-high-score');
+            const restartButton = document.getElementById('restart-button');
+
+            // Set final score
+            finalScoreElement.textContent = score;
+            
+            // Set high score
+            modalHighScoreElement.textContent = highScore;
+
+            gameOverModal.style.display = 'block';
+
+            restartButton.onclick = restartGame;
+        }
+
+        // Restart Game
+        function restartGame() {
+            // Reset score
+            score = 0;
+            document.getElementById('score').textContent = '0';
+
+            // Reset lives
+            lives = 3;
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`life-${i}`).style.display = 'block';
+            }
+
+            // Hide game over modal
+            document.getElementById('game-over-modal').style.display = 'none';
+        }
+
+        // Add event listeners to target boards
+        const targetBoards = document.querySelectorAll('.target-board');
+        targetBoards.forEach(target => {
+            target.addEventListener('click', () => showQuestion(target));
+        });
+
+        // Add event listener to bottom gun
+        const bottomGun = document.getElementById('bottom-gun-image');
+        bottomGun.addEventListener('click', () => showQuestion(bottomGun));
+    </script>
+</body>
+</html>

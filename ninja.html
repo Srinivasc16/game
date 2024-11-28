@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Constitutional Quiz Fruit Ninja</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: 	#F2D2BD;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        #game-container {
+            width: 800px;
+            height: 610px;
+            background-color: #fff;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+            cursor: none;
+        }
+
+        .fruit {
+        position: absolute;
+        width: 80px;  /* Changed from 60px */
+        height: 80px; /* Changed from 60px */
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 55px; /* Changed from 40px */
+        user-select: none;
+        }
+
+        .fruit-half {
+    position: absolute;
+    width: 40px;  /* Changed from 30px */
+    height: 80px; /* Changed from 60px */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    font-size: 55px; /* Changed from 40px */
+    pointer-events: none;
+}
+
+        .fruit-half.left {
+            justify-content: flex-end;
+        }
+
+        .fruit-half.right {
+            justify-content: flex-start;
+        }
+
+        @keyframes split-left {
+            0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateX(-100px) rotate(-45deg); opacity: 0; }
+        }
+
+        @keyframes split-right {
+            0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateX(100px) rotate(45deg); opacity: 0; }
+        }
+
+        .slice {
+            position: absolute;
+            pointer-events: none;
+            background: linear-gradient(to right,
+                transparent 0%,
+                rgba(255, 255, 255, 0.8) 50%,
+                transparent 100%
+            );
+            height: 2px;
+            transform-origin: left center;
+            opacity: 0;
+        }
+
+        @keyframes sliceAnimation {
+            0% {
+                width: 0;
+                opacity: 1;
+            }
+            100% {
+                width: 150px;
+                opacity: 0;
+            }
+        }
+
+        .sword-cursor {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            pointer-events: none;
+            z-index: 1000;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M14.5 17.5L3 6M4 4l16 16m0-16L4 20'/%3E%3C/svg%3E");
+            background-size: contain;
+            transform: rotate(-45deg);
+        }
+
+        #score, #current-sum {
+            font-size: 24px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+        }
+
+        #score {
+            left: 20px;
+        }
+
+        #current-sum {
+            left: 250px;
+        }
+
+        #right-panel {
+            width: 300px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+            border-radius: 10px;
+            height: 380px;
+            overflow-y: auto;
+        }
+
+        .fruit-info {
+            margin-bottom: 10px;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .fruit-info .emoji {
+            font-size: 24px;
+        }
+
+        .fruit-info .details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fruit-info .points {
+            color: green;
+            font-weight: bold;
+        }
+
+        #question {
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #2c3e50;
+            text-align: center;
+            width: 340px;
+            height: 120px;
+            padding-top: 50px;
+        }
+
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1500;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .modal-message {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .modal-details {
+            font-size: 16px;
+            color: #34495e;
+            margin-top: 10px;
+        }
+
+        .modal-close {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        @keyframes float-up {
+            0% { bottom: -60px; }
+            100% { bottom: 100%; }
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: red;
+            z-index: 1000;
+        }
+
+        #restart-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .locked-fruit {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .container-1 {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fruit-emoji {
+    font-size: 55px; /* Changed from 40px */
+}
+
+.fruit-points {
+    font-size: 18px; /* Changed from 16px */
+    font-weight: bold;
+    color: green;
+    position: absolute;
+    bottom: -25px; /* Changed from -20px */
+}
+
+        #instructions-overlay {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .instructions-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 500px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .instructions-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .instructions-text {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .start-game-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .start-game-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="instructions-overlay">
+        <div class="instructions-content">
+            <div class="instructions-title">Welcome to Justice Ninja!</div>
+            <div class="instructions-text">
+                <p>🎮 Game Instructions:</p>
+                <ul>
+                    <li>Move your mouse to slice fruits with your sword cursor</li>
+                    <li>Each fruit represents a point value</li>
+                    <li>Your goal is to slice fruits to match the article number mentioned in the question</li>
+                    <li>Be careful! Slicing a bomb ends the game</li>
+                    <li>Try to match the article number precisely</li>
+                </ul>
+                <p>🏆 How to Win:</p>
+                <ul>
+                    <li>Slice fruits to create a sum equal to the constitutional article number</li>
+                    <li>Gain points for correct answers</li>
+                    <li>Learn about different constitutional articles while playing</li>
+                </ul>
+            </div>
+            <button class="start-game-btn">Start Game</button>
+        </div>
+    </div>
+
+    <h1 style="font-size: 2.5em;">JUSTICE NINJA</h1>
+    <div class="container">
+        <div id="game-container">
+            <div id="score">Score: 0</div>
+            <div id="current-sum">Sum: 0</div>
+            <div class="sword-cursor"></div>
+        </div>
+        <div class="container-1">
+            <div id="right-panel">
+                <h2>Fruit & Article Information</h2>
+                <div id="fruit-info-list"></div>
+            </div>
+            <div id="question">Question Placeholder</div>
+        </div>
+    </div>
+
+    <div id="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-title"></div>
+            <div class="modal-message"></div>
+            <div class="modal-details"></div>
+            <button class="modal-close">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const scoreElement = document.getElementById('score');
+        const currentSumElement = document.getElementById('current-sum');
+        const questionElement = document.getElementById('question');
+        const fruitInfoListElement = document.getElementById('fruit-info-list');
+        const swordCursor = document.querySelector('.sword-cursor');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalTitle = modalOverlay.querySelector('.modal-title');
+        const modalMessage = modalOverlay.querySelector('.modal-message');
+        const modalDetails = modalOverlay.querySelector('.modal-details');
+        const modalClose = modalOverlay.querySelector('.modal-close');
+        let score = 0;
+        let currentSum = 0;
+        let targetArticle = 0;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let isSlicing = false;
+        let fruitSpawnInterval;
+        let isGameOver = false;
+
+        // Add instructions overlay handling
+        document.addEventListener('DOMContentLoaded', () => {
+            const instructionsOverlay = document.getElementById('instructions-overlay');
+            const startGameBtn = document.querySelector('.start-game-btn');
+
+            startGameBtn.addEventListener('click', () => {
+                instructionsOverlay.style.display = 'none';
+                
+                // Call existing game initialization
+                updateFruitInfoList();
+                startNewQuestion();
+            });
+        });
+
+        const constitutionalQuestions = [
+            {   
+                question: "Which article guarantees the right to move the Supreme Court for enforcement of Fundamental Rights?", 
+                answer: 32,
+                details: "Article 32 provides the right to individuals to move the Supreme Court to seek justice when they feel that their rights are 'unduly deprived'."
+            },
+            { 
+                question: "Which article provides the right to equality before law?", 
+                answer: 14,
+                details: "Article 14 ensures equality before the law and equal protection of the laws within the territory of India."
+            },
+            { 
+                question: "Which article outlines the Fundamental Duties of citizens?", 
+                answer: 51,
+                details: "Article 51 outlines the fundamental duties of every citizen of India, which includes respecting the Constitution, the national flag, and the national anthem."
+            },
+            { 
+                question: "Which article protects life and personal liberty?", 
+                answer: 21,
+                details: "Article 21 guarantees the protection of life and personal liberty, stating no person shall be deprived of his life or personal liberty except according to procedure established by law."
+            },
+            { 
+                question: "Which article provides freedom of speech and expression?", 
+                answer: 19,
+                details: "Article 19 guarantees the freedom of speech and expression, allowing individuals to express themselves freely but subject to reasonable restrictions."
+            }
+        ];
+
+        const articles = [
+            { emoji: '🍊', points: 2 },
+            { emoji: '🍑', points: 3 },
+            { emoji: '🍎', points: 5 },
+            { emoji: '🍇', points: 7 },
+            { emoji: '🍓', points: 10 },
+            { emoji: '🍐', points: 15 },
+            { emoji: '💣', points: 0, isBomb: true }
+        ];
+
+        gameContainer.addEventListener('mousemove', (e) => {
+            if (isGameOver) return;
+
+            const rect = gameContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+           
+            swordCursor.style.left = `${x - 15}px`;
+            swordCursor.style.top = `${y - 15}px`;
+
+            if (lastMouseX && lastMouseY) {
+                const angle = Math.atan2(y - lastMouseY, x - lastMouseX) * 180 / Math.PI;
+                swordCursor.style.transform = `rotate(${angle}deg)`;
+            }
+
+            lastMouseX = x;
+            lastMouseY = y;
+
+            if (isSlicing) {
+                createSliceEffect(x, y, angle);
+            }
+        });
+
+        gameContainer.addEventListener('mousedown', () => {
+            if (!isGameOver) {
+                isSlicing = true;
+            }
+        });
+
+        gameContainer.addEventListener('mouseup', () => {
+            isSlicing = false;
+        });
+
+        function createSliceEffect(x, y, angle) {
+            const slice = document.createElement('div');
+            slice.className = 'slice';
+            slice.style.left = `${x}px`;
+            slice.style.top = `${y}px`;
+            slice.style.transform = `rotate(${angle}deg)`;
+            slice.style.animation = 'sliceAnimation 0.2s linear forwards';
+           
+            gameContainer.appendChild(slice);
+           
+            setTimeout(() => {
+                gameContainer.removeChild(slice);
+            }, 200);
+        }
+
+        function createFruit() {
+            const fruit = document.createElement('div');
+            const articleInfo = articles[Math.floor(Math.random() * articles.length)];
+           
+            fruit.className = 'fruit';
+            fruit.innerHTML = `
+                <span class="fruit-emoji">${articleInfo.emoji}</span>
+                <span class="fruit-points">+${articleInfo.points}</span>
+            `;
+            fruit.dataset.points = articleInfo.points;
+            fruit.dataset.article = articleInfo.article;
+
+            if (articleInfo.isBomb) {
+                fruit.classList.add('bomb');
+            }
+
+            const startX = Math.random() * (gameContainer.offsetWidth - 60);
+            const duration = 3 + Math.random() * 2;
+           
+            fruit.style.left = `${startX}px`;
+            fruit.style.animation = `
+                float-up ${duration}s linear,
+                rotate ${duration * 2}s linear infinite
+            `;
+
+            fruit.addEventListener('mouseenter', (e) => {
+                if (isSlicing && !fruit.classList.contains('locked-fruit')) {
+                    if (fruit.classList.contains('bomb')) {
+                        endGame();
+                    } else {
+                        sliceFruit(fruit);
+                    }
+                }
+            });
+           
+            gameContainer.appendChild(fruit);
+
+            setTimeout(() => {
+                if (fruit.parentNode === gameContainer && !isGameOver) {
+                    gameContainer.removeChild(fruit);
+                }
+            }, duration * 1000);
+        }
+
+        function sliceFruit(fruit) {
+            if (!fruit.classList.contains('sliced')) {
+                const fruitPoints = parseInt(fruit.dataset.points);
+                currentSum += fruitPoints;
+                currentSumElement.textContent = `Sum: ${currentSum}`;
+                fruit.classList.add('sliced');
+                fruit.classList.add('locked-fruit');
+
+                const leftHalf = document.createElement('div');
+                const rightHalf = document.createElement('div');
+                
+                leftHalf.className = 'fruit-half left';
+                rightHalf.className = 'fruit-half right';
+                
+                leftHalf.innerHTML = fruit.innerHTML;
+                rightHalf.innerHTML = fruit.innerHTML;
+                
+                const fruitRect = fruit.getBoundingClientRect();
+                const containerRect = gameContainer.getBoundingClientRect();
+                
+                const fruitX = fruitRect.left - containerRect.left;
+                const fruitY = fruitRect.top - containerRect.top;
+                
+                leftHalf.style.left = `${fruitX}px`;
+                leftHalf.style.top = `${fruitY}px`;
+                rightHalf.style.left = `${fruitX + 30}px`;
+                rightHalf.style.top = `${fruitY}px`;
+                
+                leftHalf.style.animation = 'split-left 0.5s ease-out forwards';
+                rightHalf.style.animation = 'split-right 0.5s ease-out forwards';
+                
+                gameContainer.appendChild(leftHalf);
+                gameContainer.appendChild(rightHalf);
+                
+                fruit.remove();
+                
+                setTimeout(() => {
+                    leftHalf.remove();
+                    rightHalf.remove();
+                }, 500);
+
+                checkSolution();
+            }
+        }
+
+        function checkSolution() {
+            if (currentSum === targetArticle) {
+                score += 100;
+                scoreElement.textContent = `Score: ${score}`;
+                showResult(true);
+            } else if (currentSum > targetArticle) {
+                showResult(false);
+            }
+        }
+
+        function showResult(isCorrect) {
+            const currentQuestion = constitutionalQuestions.find(q => q.answer === targetArticle);
+
+            if (isCorrect) {
+                modalTitle.textContent = 'Correct!';
+                modalTitle.style.color = 'green';
+                modalMessage.textContent = `You successfully matched Article ${targetArticle} by slicing fruits!`;
+            } else {
+                modalTitle.textContent = 'Incorrect';
+                modalTitle.style.color = 'red';
+                modalMessage.textContent = `Your sum (${currentSum}) does not match Article ${targetArticle}. Try again!`;
+            }
+
+            // Add educational information about the current article
+            modalDetails.textContent = currentQuestion.details;
+
+            // Show the modal
+            modalOverlay.style.display = 'flex';
+
+            // Add click event to close button
+            modalClose.onclick = () => {
+                modalOverlay.style.display = 'none';
+                resetLevel();
+            };
+        }
+
+        function resetLevel() {
+            // Unlock and remove all fruits
+            const fruits = document.querySelectorAll('.fruit, .fruit-half, .locked-fruit');
+            fruits.forEach(fruit => {
+                if (fruit.parentNode === gameContainer) {
+                    gameContainer.removeChild(fruit);
+                }
+            });
+
+            // Start a new question
+            startNewQuestion();
+        }
+
+        function startNewQuestion() {
+            // Reset the current sum
+            currentSum = 0;
+            currentSumElement.textContent = `Sum: ${currentSum}`;
+
+            // Select a random constitutional question
+            const questionObj = constitutionalQuestions[Math.floor(Math.random() * constitutionalQuestions.length)];
+            
+            // Set the target article number
+            targetArticle = questionObj.answer;
+
+            // Update the question display
+            questionElement.textContent = questionObj.question;
+
+            // Restart fruit spawning
+            fruitSpawnInterval = setInterval(createFruit, 1500);
+        }
+
+        function updateFruitInfoList() {
+    fruitInfoListElement.innerHTML = '';
+    articles.slice(0, -1).forEach(article => {
+        const fruitInfo = document.createElement('div');
+        fruitInfo.className = 'fruit-info';
+        fruitInfo.innerHTML = `
+            <div class="emoji">${article.emoji}</div>
+            <div class="details">
+                <div class="points">+${article.points} Points</div>
+            </div>
+        `;
+        fruitInfoListElement.appendChild(fruitInfo);
+    });
+}
+
+        function endGame() {
+            isGameOver = true;
+            clearInterval(fruitSpawnInterval);
+            
+            const fruits = document.querySelectorAll('.fruit, .fruit-half');
+            fruits.forEach(fruit => fruit.remove());
+
+            const gameOverDiv = document.createElement('div');
+            gameOverDiv.id = 'game-over';
+            gameOverDiv.textContent = 'GAME OVER';
+            gameContainer.appendChild(gameOverDiv);
+
+            const restartBtn = document.createElement('button');
+            restartBtn.id = 'restart-btn';
+            restartBtn.textContent = 'Restart Game';
+            restartBtn.addEventListener('click', restartGame);
+            gameContainer.appendChild(restartBtn);
+
+            const bomb = document.querySelector('.bomb');
+            if (bomb) {
+                bomb.style.animation = 'explode 0.5s forwards';
+            }
+        }
+
+        function restartGame() {
+            // Remove game over elements
+            const gameOverDiv = document.getElementById('game-over');
+            const restartBtn = document.getElementById('restart-btn');
+            if (gameOverDiv) gameContainer.removeChild(gameOverDiv);
+            if (restartBtn) gameContainer.removeChild(restartBtn);
+
+            // Reset game state
+            isGameOver = false;
+            score = 0;
+            currentSum = 0;
+            scoreElement.textContent = 'Score: 0';
+            currentSumElement.textContent = 'Sum: 0';
+
+            // Start a new game
+            startNewQuestion();
+        }
+    </script>
+</body>
+</html>
