@@ -3,74 +3,297 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Indian Constitution Learning Game</title>
+  <title>Constitution of India Learning Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     :root {
-      --primary-color: #FF9933;
-      --secondary-color: #FFFFFF;
-      --tertiary-color: #138808;
-      --background-color: #f0f4f8;
-      --text-color: #333;
+      /* Colors inspired by Indian flag and traditional elements */
+      --primary-color: #FF9933;    /* Deep Saffron */
+      --secondary-color: #138808;  /* India Green */
+      --tertiary-color: #000080;  /* Navy Blue */
+      --background-color: #FAF5E9; /* Light Cream */
+      --text-color: #2C3E50;
+      --card-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      --gradient-bg: linear-gradient(135deg, #FF9933, #138808);
+      --correct-color: #138808;
+      --incorrect-color: #B71C1C;
     }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      font-family: 'Poppins', sans-serif;
     }
 
     body {
-      font-family: 'Roboto', Arial, sans-serif;
-      background-color: var(--background-color);
-      color: var(--text-color);
-      line-height: 1.6;
+      background-color: wheat;
+      background-repeat: repeat;
+      background-opacity: 0.1;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* Start Modal Styles */
+    .start-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+
+    .start-content {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    .start-form {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .player-name-input {
+      padding: 12px;
+      border: 2px solid var(--secondary-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .player-name-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(255,107,107,0.2);
+      outline: none;
+    }
+
+    .instructions {
+      background: #f8f9fa;
       padding: 20px;
+      border-radius: 10px;
+      text-align: left;
     }
 
+    .instructions h3 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+
+    .instructions ul {
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin-bottom: 8px;
+    }
+
+    .checkbox-group {
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .start-btn {
+      background: var(--gradient-bg);
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .start-btn:not(:disabled):hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    .start-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Game Container Styles */
     .game-container {
-      background-color: var(--secondary-color);
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      background-color: white;
+      margin-top: 10px;
+      border-radius: 20px;
+      box-shadow: var(--card-shadow);
       padding: 30px;
-      width: 100%;
-      max-width: 1200px;
+      display: none;
     }
 
-    .header {
-      text-align: center;
-      color: var(--tertiary-color);
-      font-size: 2.5rem;
+    .game-header {
+      background: white;
+      border: 2px solid var(--primary-color);
+      padding: 20px;
+      border-radius: 10px;
       margin-bottom: 30px;
-      font-weight: bold;
-    }
-
-    .game-stats {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 20px;
-      font-size: 1rem;
-      background-color: #f1f1f1;
-      padding: 15px;
-      border-radius: 10px;
+      align-items: center;
+      background-repeat: no-repeat;
+      background-position: right center;
+      background-size: contain;
     }
 
+    .game-progress {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .game-progress-container {
+      width: 100%;
+      height: 20px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--primary-color);
+    }
+
+    .game-progress-bar {
+      height: 100%;
+      background: var(--gradient-bg);
+      transition: width 0.5s ease-in-out;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Add these new styles to your existing CSS */
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn i {
+  font-size: 1.1em;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn.answered {
+  background-color: #4CAF50;
+  color: white;
+  cursor: not-allowed;
+}
+
+.btn.active {
+  background-color: var(--tertiary-color);
+  color: white;
+}
+
+.card-input {
+  width: 100%;
+  max-width: 200px;
+  margin: 15px auto;
+  padding: 12px;
+  border: 2px solid var(--secondary-color);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.card-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255,153,51,0.2);
+  outline: none;
+}
+
+.result {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 20px 0;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.result.correct {
+  background-color: rgba(76,175,80,0.1);
+  color: #4CAF50;
+}
+
+.result.incorrect {
+  background-color: rgba(244,67,54,0.1);
+  color: #F44336;
+}
+    /* Card Styles */
     .card-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 25px;
-      justify-content: center;
+      margin-top: 30px;
     }
 
     .card {
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--tertiary-color));
+      background: white;
       border-radius: 15px;
-      perspective: 1000px;
-      height: 400px;
+      box-shadow: var(--card-shadow);
       transition: all 0.3s ease;
+      height: 400px;
+      perspective: 1000px;
+      border: 2px solid var(--secondary-color);
     }
 
     .card-inner {
@@ -86,172 +309,418 @@
       transform: rotateY(180deg);
     }
 
-    .card-front, .card-back {
+    .card-front,
+    .card-back {
       position: absolute;
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      border-radius: 15px;
-    }
-
-    .card-front {
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--tertiary-color));
-      color: var(--text-color);
+      justify-content: space-between;
     }
 
     .card-back {
-      background: linear-gradient(135deg, var(--tertiary-color), var(--secondary-color), var(--primary-color));
       transform: rotateY(180deg);
-      color: var(--secondary-color);
+      background-color: #ECFFDC;
+      color: black;
+      border-radius: 15px;
     }
 
     .card-title {
-      font-size: 1.5rem;
       font-weight: bold;
-      margin-bottom: 15px;
-      color: var(--text-color);
+      color: var(--primary-color);
+      padding: 10px;
+      background-color: rgba(255,107,107,0.1);
+      border-radius: 10px;
     }
 
     .card-body {
-      font-size: 1.5rem;
-      margin-bottom: 15px;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      padding: 20px;
     }
 
     .card-input {
       width: 100%;
       padding: 10px;
-      margin: 15px 0;
-      border: 2px solid var(--tertiary-color);
+      margin: 10px 0;
+      border: 2px solid var(--secondary-color);
       border-radius: 8px;
-      font-size: 1rem;
-    }
-
-    .btn {
-      padding: 10px 20px;
-      margin: 5px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+      text-align: center;
       font-size: 1rem;
       transition: all 0.3s ease;
     }
 
+    .card-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(255,107,107,0.2);
+      outline: none;
+    }
+
+    /* Button Styles */
+    .btn {
+      padding: 8px 16px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
     .check-btn {
-      background-color: var(--tertiary-color);
+      background-color: var(--primary-color);
       color: white;
     }
 
     .info-btn {
-      background-color: #007bff;
+      background-color: var(--secondary-color);
       color: white;
-    }
-
-    .next-btn {
-      background-color: var(--primary-color);
-      color: white;
-      display: none;
     }
 
     .btn:hover {
-      opacity: 0.9;
-      transform: scale(1.05);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
 
-    .info-popup {
+    /* Achievement Toast */
+    .achievement-toast {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
+      bottom: 20px;
+      right: 20px;
+      background: var(--gradient-bg);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       display: none;
-      justify-content: center;
-      align-items: center;
+      animation: slideIn 0.5s ease-out;
       z-index: 1000;
     }
 
-    .info-popup-content {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      width: 80%;
-      max-width: 600px;
-      max-height: 70%;
-      overflow-y: auto;
-      position: relative;
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
     }
 
-    .close-info {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: red;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      cursor: pointer;
-    }
-
+    /* Responsive Design */
     @media (max-width: 768px) {
       .card-container {
         grid-template-columns: 1fr;
       }
 
-      .header {
-        font-size: 2rem;
+      .game-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
       }
     }
+    .nav-bar {
+            background: var(--gradient-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-bar button {
+            background: white;
+            color: var(--primary-color);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-bar button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            flex: 1;
+            height: 350px;
+        }
+
+        .side-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: var(--card-shadow);
+            display: none;
+        }
+
+        .side-panel.active {
+            display: block;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .achievement-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .achievement-card.unlocked {
+            background: var(--gradient-bg);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .card-row {
+                flex-direction: column;
+            }
+
+            .nav-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+        .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 500px;
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 1001;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.popup.active {
+    display: block;
+    opacity: 1;
+}
+
+.close-popup {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--primary-color);
+    transition: transform 0.3s ease;
+}
+
+.close-popup:hover {
+    transform: scale(1.1);
+}
+
+.popup-content {
+    margin-top: 20px;
+}
+.timer-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .timer-icon {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+  }
+
+  .timer-text {
+    font-weight: bold;
+    color: var(--text-color);
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .timer-warning {
+    color: #FF6B6B;
+    animation: pulse 1s infinite alternate;
+  }
+
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+  }
+  .points-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f0f0f0;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.points-icon {
+  color: gold;
+  font-size: 1.5rem;
+}
+
+.points-text {
+  font-weight: bold;
+  color: var(--text-color);
+  min-width: 80px;
+  text-align: center;
+}
+
+.coins-text {
+  font-weight: bold;
+  color: green;
+  min-width: 60px;
+  text-align: center;
+}
   </style>
 </head>
 <body>
-  <div class="game-container">
-    <div class="header">Indian Constitution Learning Game</div>
-    <div class="game-stats">
-      <div>Points: <span id="points">0</span></div>
-      <div>Set: <span id="current-set">1</span>/<span id="total-sets">2</span></div>
-      <div>Difficulty: Easy</div>
-    </div>
-    <div class="card-container"></div>
-    <div class="text-center mt-4">
-      <button class="btn next-btn" id="next-btn">Next Set</button>
-    </div>
-  </div>
+  <div class="container">
+    <!-- Start Modal -->
+    <div class="start-modal" id="start-modal">
+      <div class="start-content">
+        <h2>🇮🇳 Constitution of India Quiz</h2>
+        <div class="start-form">
+          <div class="form-group">
+            <label for="player-name">Enter Your Name:</label>
+            <input type="text" id="player-name" class="player-name-input" placeholder="Your Name" required>
+          </div>
 
-  <div class="info-popup" id="info-popup">
-    <div class="info-popup-content">
-      <button class="close-info" id="close-info">×</button>
-      <div id="info-content"></div>
-    </div>
-  </div>
+          <div class="instructions">
+            <h3>How to Play:</h3>
+            <ul>
+              <li>Answer questions about the Indian Constitution</li>
+              <li>Enter numerical answers only</li>
+              <li>Get achievements for good performance</li>
+              <li>Track your progress as you play</li>
+            </ul>
+          </div>
 
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="agree-terms" required>
+            <label for="agree-terms">I understand and am ready to start</label>
+          </div>
+
+          <button class="start-btn" id="start-game-btn" disabled>
+            <i class="fas fa-play"></i> Start Quiz
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-container" id="game-container">
+      <div class="nav-bar">
+          <h2>Constitution Quiz</h2>
+          <div>
+            <button id="instructions-btn">Instructions</button>
+            <button id="leaderboard-btn">Leaderboard</button>
+            <button id="achievements-btn">Achievements</button>
+          </div>
+      </div>
+      <div class="popup-overlay" id="popup-overlay"></div>
+      <div class="popup" id="popup">
+          <button class="close-popup">&times;</button>
+          <div class="popup-content" id="popup-content"></div>
+      </div>
+
+      <div class="game-header">
+        <div class="timer-container">
+          <i class="fas fa-clock timer-icon"></i>
+          <span class="timer-text" id="game-timer">02:00</span>
+        </div>
+        <div class="points-container">
+          <i class="fas fa-star points-icon"></i>
+          <span class="points-text" id="game-points">0</span>
+          <i class="fas fa-coins points-icon"></i>
+          <span class="coins-text" id="game-coins">0</span>
+        </div>
+          <div class="game-progress">
+              <div class="game-progress-container">
+                  <div class="game-progress-bar" id="game-progress-bar">0%</div>
+              </div>
+          </div>
+      </div>
+
+      <div class="card-row" id="card-container"></div>
   <script>
     const cardSets = [
-  // Existing first two sets...
   [
     { 
       title: "Article 19", 
       body: "Right to Freedom of Speech", 
       year: 1949, 
-      info: "Article 19 is a cornerstone of Indian democracy, granting citizens the fundamental right to freedom of speech and expression. It allows individuals to express their opinions, criticize the government, and engage in open dialogue without fear of persecution. However, this right is not absolute and comes with reasonable restrictions to maintain public order, decency, and national security."
+      info: "Grants freedom of speech and expression but allows restrictions for public order, decency, and security."
     },
     { 
       title: "Article 14", 
       body: "Equality before the Law", 
       year: 1949, 
-      info: "Article 14 embodies the principle of equality, ensuring that no citizen is discriminated against based on race, gender, religion, or social status. It guarantees equal protection under the law and prohibits arbitrary treatment by the state. This article is crucial in promoting social justice and preventing discrimination in all forms of governance and social interactions."
+      info: "Ensures equality before the law and prohibits discrimination by the state, promoting social justice."
     },
     { 
       title: "Article 21", 
       body: "Right to Life and Personal Liberty", 
       year: 1949, 
-      info: "Often called the 'heart of fundamental rights', Article 21 protects the right to life and personal liberty. The Supreme Court has interpreted this broadly, expanding it to include the right to dignity, health, education, and a clean environment. It ensures that no person can be deprived of their life or personal liberty except through a fair, just, and reasonable procedure established by law."
+      info: "Protects the right to life and liberty and includes rights to dignity, health, and a clean environment."
     }
   ],
   [
@@ -259,40 +728,39 @@
       title: "Amendment 42", 
       body: "Added 'Socialist', 'Secular'", 
       year: 1976, 
-      info: "The 42nd Amendment, passed during the Emergency period, was a significant modification to the Constitution. It added the words 'Socialist' and 'Secular' to the Preamble, emphasizing India's commitment to social and economic equality, and religious neutrality. This amendment reflected the government's vision of creating a more inclusive and just society."
+      info: "Added 'Socialist' and 'Secular' to the Preamble to emphasize social equality and religious neutrality."
     },
     { 
       title: "Amendment 44", 
       body: "Repealed Right to Property", 
       year: 1978, 
-      info: "The 44th Amendment removed the Right to Property as a fundamental right, transforming it into a legal right. This change allowed the government more flexibility in land redistribution and implementing social welfare policies. It was a crucial step in addressing economic inequalities and enabling land reforms in post-independence India."
+      info: "Changed Right to Property from a fundamental right to a legal right, enabling land reforms."
     },
     { 
       title: "Article 32", 
       body: "Right to Constitutional Remedies", 
       year: 1949, 
-      info: "Described by Dr. B.R. Ambedkar as the 'heart and soul' of the Constitution, Article 32 empowers citizens to directly approach the Supreme Court for the enforcement of fundamental rights. It provides a constitutional mechanism to protect individual liberties and hold the government accountable, making the judiciary a guardian of citizens' rights."
+      info: "Empowers citizens to approach the Supreme Court directly to enforce fundamental rights."
     }
   ],
-  // New Sets Start Here
   [
     {
       title: "Article 15",
       body: "Prohibition of Discrimination",
       year: 1949,
-      info: "Article 15 prohibits discrimination on grounds of religion, race, caste, sex, or place of birth. It ensures that the state cannot discriminate against citizens and also allows special provisions for women, children, and socially disadvantaged groups to promote equality."
+      info: "Prohibits discrimination based on religion, race, caste, sex, or place of birth, while allowing affirmative action."
     },
     {
       title: "Article 17",
       body: "Abolition of Untouchability",
       year: 1949,
-      info: "Article 17 abolishes untouchability and forbids its practice in any form. It is a powerful constitutional provision that aims to eradicate the social evil of caste-based discrimination and ensure dignity for all citizens, regardless of their social background."
+      info: "Abolishes untouchability and forbids its practice in any form, ensuring social dignity for all."
     },
     {
       title: "Article 25",
       body: "Freedom of Religion",
       year: 1949,
-      info: "Article 25 guarantees freedom of conscience and the right to freely profess, practice, and propagate religion. It ensures religious freedom while allowing the state to regulate religious practices for public order, morality, and health."
+      info: "Guarantees the freedom to profess, practice, and propagate religion with reasonable restrictions."
     }
   ],
   [
@@ -300,19 +768,19 @@
       title: "Amendment 73",
       body: "Panchayati Raj System",
       year: 1992,
-      info: "The 73rd Amendment introduced the Panchayati Raj system, mandating regular elections for local self-government in rural areas. It empowered local communities by creating a three-tier system of panchayats and reserving seats for women and marginalized communities."
+      info: "Introduced local self-governance in rural areas with a three-tier system and reserved seats for marginalized groups."
     },
     {
       title: "Amendment 74",
       body: "Urban Local Bodies",
       year: 1992,
-      info: "Complementing the 73rd Amendment, the 74th Amendment provided constitutional status to urban local bodies. It aimed to decentralize power and improve governance by creating municipalities with elected representatives and defined powers."
+      info: "Established municipalities to decentralize governance and enhance urban administration."
     },
     {
       title: "Article 370",
       body: "Special Status of Jammu and Kashmir",
       year: 1954,
-      info: "Originally granted special autonomous status to Jammu and Kashmir, allowing it to have its own constitution and significant legislative autonomy. Notably, this article was abrogated in 2019, fundamentally changing the region's constitutional position."
+      info: "Granted special autonomy to Jammu and Kashmir, which was revoked in 2019."
     }
   ],
   [
@@ -320,19 +788,19 @@
       title: "Article 38",
       body: "Social Order for Welfare",
       year: 1949,
-      info: "Article 38 directs the state to secure a social order for the promotion of welfare of the people. It emphasizes minimizing inequalities in income, status, facilities, and opportunities, forming the basis of India's commitment to social justice."
+      info: "Directs the state to reduce inequalities and promote social and economic welfare."
     },
     {
       title: "Article 39A",
       body: "Equal Justice and Free Legal Aid",
       year: 1976,
-      info: "Added by the 42nd Amendment, Article 39A ensures that the legal system promotes justice on the basis of equal opportunity and provides free legal aid to ensure that opportunities for securing justice are not denied to any citizen."
+      info: "Mandates free legal aid to ensure justice for all, especially the disadvantaged."
     },
     {
       title: "Amendment 86",
       body: "Right to Education",
       year: 2002,
-      info: "The 86th Amendment made education a fundamental right for children aged 6-14 years. It made free and compulsory education a constitutional obligation of the state, significantly advancing educational opportunities for all children."
+      info: "Made education a fundamental right for children aged 6-14 years, ensuring free and compulsory education."
     }
   ],
   [
@@ -340,19 +808,19 @@
       title: "Article 48A",
       body: "Protection of Environment",
       year: 1976,
-      info: "Added by the 42nd Amendment, Article 48A mandates the state to protect and improve the environment and safeguard forests and wildlife. It represents an early constitutional commitment to environmental conservation."
+      info: "Obligates the state to protect and improve the environment and safeguard forests and wildlife."
     },
     {
       title: "Article 51A",
       body: "Fundamental Duties",
       year: 1976,
-      info: "Introduced by the 42nd Amendment, this article outlines the fundamental duties of citizens, including protecting the environment, developing scientific temper, and respecting the national flag and constitution."
+      info: "Lists the fundamental duties of citizens, including protecting the environment and respecting national symbols."
     },
     {
       title: "Amendment 97",
       body: "Goods and Services Tax",
       year: 2016,
-      info: "The 101st Amendment introduced the Goods and Services Tax (GST), creating a unified national market by replacing multiple state and central taxes, significantly transforming India's economic landscape."
+      info: "Introduced GST, creating a unified tax system across India to simplify trade and commerce."
     }
   ],
   [
@@ -360,19 +828,19 @@
       title: "Article 16",
       body: "Equality of Opportunity in Public Employment",
       year: 1949,
-      info: "Article 16 ensures equal opportunities in public employment and prohibits discrimination based on religion, race, caste, sex, descent, place of birth, or residence. It also allows reservations for disadvantaged groups."
+      info: "Ensures equal opportunities in public jobs while allowing reservations for disadvantaged groups."
     },
     {
       title: "Article 23",
       body: "Prohibition of Human Trafficking",
       year: 1949,
-      info: "Article 23 prohibits human trafficking and forced labor, making it a fundamental right. It empowers the state to take actions against any form of human exploitation."
+      info: "Prohibits human trafficking and forced labor, ensuring protection from exploitation."
     },
     {
       title: "Amendment 101",
       body: "Reservation for SC/ST/OBC",
       year: 2018,
-      info: "This amendment provided 10% reservation for economically weaker sections in general category, expanding the scope of affirmative action beyond caste-based reservations."
+      info: "Introduced 10% reservation for economically weaker sections in the general category."
     }
   ],
   [
@@ -380,19 +848,19 @@
       title: "Article 44",
       body: "Uniform Civil Code",
       year: 1949,
-      info: "A Directive Principle that recommends the state to secure a Uniform Civil Code, aiming to replace personal laws based on religious scriptures with a common set of rules governing every citizen."
+      info: "Recommends a common civil code to unify personal laws irrespective of religion."
     },
     {
       title: "Article 45",
       body: "Early Childhood Care and Education",
       year: 1949,
-      info: "Directs the state to provide free and compulsory education for children until they complete the age of fourteen years, emphasizing the importance of childhood development."
+      info: "Mandates free and compulsory education for children until the age of 14 years."
     },
     {
       title: "Amendment 102",
       body: "National Judicial Appointments Commission",
       year: 2014,
-      info: "Attempted to change the judicial appointments process, but was later struck down by the Supreme Court, maintaining the existing collegium system."
+      info: "Proposed changes to the judicial appointment process but was struck down by the Supreme Court."
     }
   ],
   [
@@ -400,19 +868,19 @@
       title: "Article 29",
       body: "Protection of Cultural and Educational Rights",
       year: 1949,
-      info: "Protects the rights of minorities to conserve their unique language, script, and culture. It ensures that no citizen shall be denied admission to educational institutions on grounds of religion, race, caste, or language."
+      info: "Protects the rights of minorities to conserve their culture, language, and script."
     },
     {
       title: "Article 30",
       body: "Right of Minorities to Establish Educational Institutions",
       year: 1949,
-      info: "Allows minorities, both religious and linguistic, to establish and administer their own educational institutions, promoting educational diversity and cultural preservation."
+      info: "Allows minorities to establish and manage educational institutions to preserve their identity."
     },
     {
       title: "Amendment 93",
       body: "Reservation in Promotions for SC/ST",
       year: 2012,
-      info: "Validated state laws providing reservation in promotions for Scheduled Castes and Scheduled Tribes, addressing historical social inequalities."
+      info: "Validated reservations in promotions for SC/ST to address social inequalities."
     }
   ],
   [
@@ -420,138 +888,441 @@
       title: "Article 35",
       body: "Power of Parliament to Legislate",
       year: 1949,
-      info: "Empowers Parliament to make laws implementing the fundamental rights, ensuring that constitutional guarantees can be effectively enforced through appropriate legislation."
+      info: "Empowers Parliament to make laws ensuring fundamental rights are effectively implemented."
     },
     {
       title: "Article 37",
       body: "Directive Principles Non-Justiciable",
       year: 1949,
-      info: "Clarifies that Directive Principles are not legally enforceable but fundamental in the governance of the country and must be applied by the state in making laws."
+      info: "States that Directive Principles are not enforceable but guide governance and policy-making."
     },
     {
       title: "Amendment 100",
       body: "Anti-Defection Law",
       year: 2003,
-      info: "Strengthened provisions to prevent political defections, ensuring stability in legislative bodies and discouraging horse-trading of legislators."
+      info: "Strengthened anti-defection measures to prevent political instability and unethical practices."
     }
   ]
 ];
 
-    class ConstitutionCardGame {
-      constructor(cardSets) {
-        this.cardSets = cardSets;
-        this.currentSetIndex = 0;
-        this.points = 0;
+const achievements = {
+  quickLearner: {
+    id: 'quickLearner',
+    title: 'Quick Learner',
+    description: 'Answer 3 questions correctly in a row',
+    unlocked: false
+  },
+  constitutionalExpert: {
+    id: 'constitutionalExpert',
+    title: 'Constitutional Expert',
+    description: 'Complete all sets with 80% accuracy',
+    unlocked: false
+  },
+  speedyScholar: {
+    id: 'speedyScholar',
+    title: 'Speedy Scholar',
+    description: 'Complete a set in under 60 seconds',
+    unlocked: false
+  }
+};
 
-        this.container = document.querySelector('.card-container');
-        this.pointsDisplay = document.getElementById('points');
-        this.nextButton = document.getElementById('next-btn');
-        this.infoPopup = document.getElementById('info-popup');
-        this.infoContent = document.getElementById('info-content');
-        this.closeInfo = document.getElementById('close-info');
-        this.currentSetDisplay = document.getElementById('current-set');
-        this.totalSetsDisplay = document.getElementById('total-sets');
-
-        this.totalSetsDisplay.textContent = this.cardSets.length;
-        this.setupEventListeners();
-        this.loadSet();
+class ConstitutionGame {
+  constructor(cardSets) {
+    this.cardSets = cardSets;
+    this.currentSetIndex = 0;
+    this.correctAnswers = 0;
+    this.totalAnswers = 0;
+    this.consecutiveCorrect = 0;
+    this.startTime = null;
+    this.playerName = '';
+    this.achievements = { ...achievements };
+    this.initializeDOM();
+    this.setupEventListeners();
+    this.initializeNavigation();
+    this.timeRemaining = 120;
+    this.timerInterval = null;
+    this.points = 0;
+    this.coins = 0;
+  }
+  startTimer() {
+    const timerElement = document.getElementById('game-timer');
+    
+    this.timerInterval = setInterval(() => {
+      this.timeRemaining--;
+      
+      // Format time as MM:SS
+      const minutes = Math.floor(this.timeRemaining / 60);
+      const seconds = this.timeRemaining % 60;
+      const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      timerElement.textContent = formattedTime;
+      
+      // Add warning style when time is low
+      if (this.timeRemaining <= 60) {
+        timerElement.classList.add('timer-warning');
       }
-
-      setupEventListeners() {
-        this.nextButton.addEventListener('click', () => this.nextSet());
-        this.closeInfo.addEventListener('click', () => this.hideInfoPopup());
-        this.container.addEventListener('transitionend', () => this.checkAllCardsFlipped());
+      
+      // End game when time runs out
+      if (this.timeRemaining <= 0) {
+        this.endGame(true);
       }
+    }, 1000);
+  }
 
-      loadSet() {
-        this.container.innerHTML = '';
-        const currentSet = this.cardSets[this.currentSetIndex];
-        
-        currentSet.forEach(data => {
-          const card = this.createCard(data);
-          this.container.appendChild(card);
-        });
+  addTime(seconds) {
+    const timerElement = document.getElementById('game-timer');
+    this.timeRemaining += seconds;
+    
+    // Briefly show a "+" animation
+    const plusElement = document.createElement('span');
+    plusElement.textContent = `+${seconds}s`;
+    plusElement.style.color = 'green';
+    plusElement.style.marginLeft = '10px';
+    plusElement.style.animation = 'fadeOut 2s';
+    timerElement.parentElement.appendChild(plusElement);
+    
+    setTimeout(() => {
+      plusElement.remove();
+    }, 2000);
+  }
+  initializeDOM() {
+    this.elements = {
+      startModal: document.getElementById('start-modal'),
+      gameContainer: document.getElementById('game-container'),
+      cardContainer: document.getElementById('card-container'),
+      playerNameInput: document.getElementById('player-name'),
+      agreeTerms: document.getElementById('agree-terms'),
+      startButton: document.getElementById('start-game-btn')
+    };
+  }
+  initializeNavigation() {
+    // Get DOM elements
+    const popupOverlay = document.getElementById('popup-overlay');
+    const popup = document.getElementById('popup');
+    const popupContent = document.getElementById('popup-content');
+    const closePopupButton = document.querySelector('.close-popup');
 
-        this.currentSetDisplay.textContent = this.currentSetIndex + 1;
-        this.nextButton.style.display = 'none';
-      }
+    // Function to show popup
+    const showPopup = (content) => {
+        popup.style.display = 'block';
+        popupOverlay.style.display = 'block';
+        popupContent.innerHTML = content;
+        setTimeout(() => {
+            popup.classList.add('active');
+            popupOverlay.classList.add('active');
+        }, 10);
+    };
 
-      createCard(data) {
-        const card = document.createElement('div');
-        card.classList.add('card');
+    // Function to hide popup
+    const hidePopup = () => {
+        popup.classList.remove('active');
+        popupOverlay.classList.remove('active');
+        setTimeout(() => {
+            popup.style.display = 'none';
+            popupOverlay.style.display = 'none';
+        }, 300);
+    };
 
-        card.innerHTML = `
-          <div class="card-inner">
-            <div class="card-front">
-              <div class="card-title">${data.title}</div>
-              <div class="card-body">${data.body}</div>
-              <input type="number" class="card-input" placeholder="Enter Year">
-              <div>
-                <button class="btn check-btn">Check Year</button>
-                <button class="btn info-btn">More Info</button>
-              </div>
+    // Button click handlers
+    document.getElementById('instructions-btn').addEventListener('click', () => {
+        showPopup(`
+            <h2 style="color: var(--primary-color); margin-bottom: 20px;">Instructions</h2>
+            <ul style="list-style-type: none; padding: 0;">
+                <li style="margin-bottom: 10px;">• Answer questions about the Indian Constitution</li>
+                <li style="margin-bottom: 10px;">• Enter numerical answers only</li>
+                <li style="margin-bottom: 10px;">• Get achievements for good performance</li>
+                <li style="margin-bottom: 10px;">• Track your progress as you play</li>
+            </ul>
+        `);
+    });
+
+    document.getElementById('leaderboard-btn').addEventListener('click', () => {
+        showPopup(`
+            <h2 style="color: var(--primary-color); margin-bottom: 20px;">Leaderboard</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>${this.playerName || 'Player 1'}</td>
+                        <td>${this.correctAnswers || 0}</td>
+                    </tr>
+                </tbody>
+            </table>
+        `);
+    });
+
+    document.getElementById('achievements-btn').addEventListener('click', () => {
+        const achievementsList = Object.values(this.achievements)
+            .map(achievement => `
+                <div class="achievement-card ${achievement.unlocked ? 'unlocked' : ''}">
+                    <h4>${achievement.title}</h4>
+                    <p>${achievement.description}</p>
+                </div>
+            `).join('');
+
+        showPopup(`
+            <h2 style="color: var(--primary-color); margin-bottom: 20px;">Achievements</h2>
+            <div class="achievements-grid">
+                ${achievementsList}
             </div>
-            <div class="card-back">
-              <div class="result">Correct Year: ${data.year}</div>
-            </div>
+        `);
+    });
+
+    // Close button and overlay click handlers
+    closePopupButton.addEventListener('click', hidePopup);
+    popupOverlay.addEventListener('click', hidePopup);
+
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hidePopup();
+        }
+    });
+}
+setupEventListeners() {
+    // Input and checkbox validation
+    this.elements.playerNameInput.addEventListener('input', () => this.validateStartForm());
+    this.elements.agreeTerms.addEventListener('change', () => this.validateStartForm());
+    
+    // Start button
+    this.elements.startButton.addEventListener('click', () => {
+      if (!this.elements.startButton.disabled) {
+        this.startGame();
+        // Add animation class
+        this.elements.gameContainer.classList.add('fade-in');
+      }
+    });
+    document.querySelectorAll('.btn').forEach(button => {
+      button.addEventListener('mouseenter', (e) => {
+        e.target.style.transform = 'scale(1.05)';
+      });
+      button.addEventListener('mouseleave', (e) => {
+        e.target.style.transform = 'scale(1)';
+      });
+    });
+  }
+
+  validateStartForm() {
+    const nameValid = this.elements.playerNameInput.value.trim().length > 0;
+    const termsChecked = this.elements.agreeTerms.checked;
+    this.elements.startButton.disabled = !(nameValid && termsChecked);
+  }
+
+  startGame() {
+    if (this.elements.startButton.disabled) return;
+
+    this.playerName = this.elements.playerNameInput.value.trim();
+    this.elements.startModal.style.display = 'none';
+    this.elements.gameContainer.style.display = 'block';
+
+    this.startTime = Date.now();
+    this.startTimer(); // Start the timer
+    this.loadCurrentSet();
+  }
+
+  loadCurrentSet() {
+    this.elements.cardContainer.innerHTML = '';
+    const currentSet = this.cardSets[this.currentSetIndex];
+
+    currentSet.forEach(cardData => {
+      const card = this.createCard(cardData);
+      this.elements.cardContainer.appendChild(card);
+    });
+  }
+
+  createCard(data) {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-front">
+          <div class="card-title">${data.title}</div>
+          <div class="card-body">${data.body}</div>
+          <input type="number" class="card-input" placeholder="Enter Your Answer">
+          <div>
+            <button class="btn check-btn">Check Answer</button>
+            <button class="btn info-btn">More Info</button>
           </div>
-        `;
+        </div>
+        <div class="card-back">
+          <div class="result"></div>
+          <div class="back-info">
+            <div class="additional-info">${data.info}</div>
+          </div>
+        </div>
+      </div>
+    `;
 
-        const checkButton = card.querySelector('.check-btn');
-        const infoButton = card.querySelector('.info-btn');
-        const input = card.querySelector('.card-input');
+    const checkBtn = card.querySelector('.check-btn');
+    const infoBtn = card.querySelector('.info-btn');
+    const input = card.querySelector('.card-input');
+    const result = card.querySelector('.result');
 
-        checkButton.addEventListener('click', () => this.checkYear(card, input, data));
-        infoButton.addEventListener('click', () => this.showInfo(data));
+    checkBtn.addEventListener('click', () => this.checkAnswer(card, input, data, result));
+    infoBtn.addEventListener('click', () => this.showInfo(data));
 
-        return card;
-      }
+    return card;
+  }
 
-      checkYear(card, input, data) {
-        const enteredYear = parseInt(input.value);
-        const backContent = card.querySelector('.card-back .result');
+  updateProgress() {
+    const totalCards = this.cardSets.flat().length;
+    const completedCards = this.totalAnswers;
+    const progress = (completedCards / totalCards) * 100;
+    const progressBar = document.getElementById('game-progress-bar');
+    progressBar.style.width = `${progress}%`;
+    progressBar.textContent = `${Math.round(progress)}%`;
+  }
 
-        if (enteredYear === data.year) {
-          this.points += 10;
-          backContent.textContent = `Correct! Year: ${data.year}`;
-          backContent.style.color = 'green';
-        } else {
-          backContent.textContent = `Wrong! Correct Year: ${data.year}`;
-          backContent.style.color = 'red';
-        }
+  showAchievementToast(achievement) {
+    const toast = document.createElement('div');
+    toast.className = 'achievement-toast';
+    toast.innerHTML = `
+      <h3>🏆 Achievement Unlocked!</h3>
+      <p>${achievement.title}</p>
+      <p>${achievement.description}</p>
+    `;
+    document.body.appendChild(toast);
+    toast.style.display = 'block';
+    setTimeout(() => {
+      toast.style.display = 'none';
+      toast.remove();
+    }, 3000);
+  }
 
-        this.pointsDisplay.textContent = this.points;
-        card.classList.add('flipped');
-      }
-
-      showInfo(data) {
-        this.infoContent.textContent = data.info;
-        this.infoPopup.style.display = 'flex';
-      }
-
-      hideInfoPopup() {
-        this.infoPopup.style.display = 'none';
-      }
-
-      nextSet() {
-        if (this.currentSetIndex < this.cardSets.length - 1) {
-          this.currentSetIndex++;
-          this.loadSet();
-        }
-      }
-
-      checkAllCardsFlipped() {
-        const allCardsFlipped = Array.from(document.querySelectorAll('.card'))
-          .every(card => card.classList.contains('flipped'));
-
-        if (allCardsFlipped && this.currentSetIndex < this.cardSets.length - 1) {
-          this.nextButton.style.display = 'block';
-        }
-      }
+  checkAchievements() {
+    // Quick Learner Achievement
+    if (this.consecutiveCorrect >= 3 && !this.achievements.quickLearner.unlocked) {
+      this.achievements.quickLearner.unlocked = true;
+      this.showAchievementToast(this.achievements.quickLearner);
     }
 
-    // Initialize the game
-    new ConstitutionCardGame(cardSets);
+    // Constitutional Expert Achievement
+    const accuracy = (this.correctAnswers / this.totalAnswers) * 100;
+    if (this.totalAnswers === this.cardSets.flat().length && accuracy >= 80 && !this.achievements.constitutionalExpert.unlocked) {
+      this.achievements.constitutionalExpert.unlocked = true;
+      this.showAchievementToast(this.achievements.constitutionalExpert);
+    }
+
+    // Speedy Scholar Achievement
+    if (this.startTime) {
+      const timeElapsed = (Date.now() - this.startTime) / 1000;
+      if (timeElapsed <= 60 && !this.achievements.speedyScholar.unlocked) {
+        this.achievements.speedyScholar.unlocked = true;
+        this.showAchievementToast(this.achievements.speedyScholar);
+      }
+    }
+  }
+
+  checkAnswer(card, input, data, result) {
+    const userAnswer = parseInt(input.value);
+    this.totalAnswers++;
+
+    if (userAnswer === data.year) {
+      result.innerHTML = 'Correct!';
+      result.classList.add('correct');
+      this.correctAnswers++;
+      this.consecutiveCorrect++;
+      
+      // Add points and potentially coins
+      this.addPoints(10);
+      
+      // Add 5 seconds for correct answer
+      this.addTime(5);
+    } else {
+      result.innerHTML = `Wrong. The correct answer is ${data.year}`;
+      result.classList.add('incorrect');
+      this.consecutiveCorrect = 0;
+    }
+
+    card.classList.add('flipped');
+    this.updateProgress();
+    this.checkAchievements();
+    this.checkSetCompletion();
+  }
+
+  // New method to add points
+  addPoints(pointsToAdd) {
+    const pointsElement = document.getElementById('game-points');
+    const coinsElement = document.getElementById('game-coins');
+
+    // Add points
+    this.points += pointsToAdd;
+    pointsElement.textContent = this.points;
+
+    // Convert points to coins (1 coin per 50 points)
+    this.coins = Math.floor(this.points / 30);
+    coinsElement.textContent = this.coins;
+  }
+
+  // Modify endGame to show points and coins
+  endGame(timeOut = false) {
+    // Clear the timer interval
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
+
+    this.elements.cardContainer.innerHTML = `
+      <div style="text-align:center; width:100%; padding: 30px;">
+        <h2>${timeOut ? 'Time is up! 🕰️' : 'Congratulations, ' + this.playerName + '! 🎉'}</h2>
+        <p>You answered ${this.correctAnswers} out of ${this.totalAnswers} questions correctly.</p>
+        <p>Points: ${this.points} | Coins: ${this.coins}</p>
+        <button class="start-btn" onclick="location.reload()">Play Again</button>
+      </div>
+    `;
+  }
+
+
+  checkSetCompletion() {
+    const allCards = this.elements.cardContainer.querySelectorAll('.card');
+    const allFlipped = Array.from(allCards).every(card => card.classList.contains('flipped'));
+
+    if (allFlipped) {
+      if (this.currentSetIndex < this.cardSets.length - 1) {
+        this.currentSetIndex++;
+        setTimeout(() => this.loadCurrentSet(), 2000);
+      } else {
+        this.endGame();
+      }
+    }
+  }
+
+  endGame() {
+    this.elements.cardContainer.innerHTML = `
+      <div style="text-align:center; width:100%; padding: 30px;">
+        <h2>Congratulations, ${this.playerName}! 🎉</h2>
+        <p>You've completed the Constitution of India Learning Game!</p>
+        <button class="start-btn" onclick="location.reload()">Play Again</button>
+      </div>
+    `;
+  }
+
+  showInfo(data) {
+    const infoPopup = document.getElementById('info-popup');
+    const infoContent = document.getElementById('info-content');
+
+    infoContent.innerHTML = `
+      <h2>${data.title}</h2>
+      <p>${data.info}</p>
+    `;
+
+    infoPopup.style.display = 'flex';
+  }
+
+  closeInfoPopup() {
+    document.getElementById('info-popup').style.display = 'none';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  new ConstitutionGame(cardSets);
+});
   </script>
 </body>
 </html>
